@@ -1,0 +1,128 @@
+/* General Styling */
+body {
+    display: grid;
+    grid-template-rows: 35% 20% 45%;
+    grid-template-columns: 35% 30% 35%;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+    background-color: #f5f7fa;
+    color: #333;
+}
+
+/* Textareas */
+textarea {
+    width: 90%;
+    height: 90%;
+    margin: auto;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 1rem;
+    background: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    resize: none;
+}
+
+/* Buttons */
+button {
+    display: inline-block;
+    width: 80%;
+    height: 60px;
+    margin: auto;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+button.primary-btn {
+    background-color: #007BFF;
+}
+
+button.primary-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Reserved Section */
+#reserved {
+    text-align: center;
+    font-size: 1.5rem;
+    color: #666;
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin: auto;
+}
+
+/* Control Panel */
+#control-panel {
+    text-align: center;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#control-panel h2 {
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+    color: #007BFF;
+}
+
+#control-panel p {
+    font-size: 1.2rem;
+    margin: 5px 0;
+}
+
+/* Registers */
+#registers {
+    padding: 20px;
+    background-color: #f8f9fa;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#registers h2 {
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+    color: #007BFF;
+}
+
+#registerDisplay span {
+    margin-right: 20px;
+    display: inline-block;
+    width: 80px;
+}
+
+/* Stack Display */
+#stackDisplay {
+    width: 90%;
+    height: 90%;
+    margin: auto;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 1rem;
+    background: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Utility */
+.primary-btn {
+    background-color: #007BFF;
+    color: #fff;
+}
+
+.primary-btn:hover {
+    background-color: #0056b3;
+}
