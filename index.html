@@ -1,29 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ASM Program Simulator</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-    <!-- Row 1 --> 
-    <textarea id="InputASM" placeholder=" Paste your ASM program here (use hexadecimal, e.g., #0x6, #0x5 for constants)... "></textarea>
-    <button id="Convert" class="primary-btn">Convert</button>
-    <textarea id="OutputJSON" readonly placeholder="Converted JSON will appear here..."></textarea>
-    
-    <!-- Row 2 -->
-    <textarea id="InMemoryProgram" readonly placeholder="Memory-mapped ASM program..."></textarea>
-    <button id="RUN_NEXT" class="primary-btn">Run Next</button>
-    <div id="control-panel">
-        <h2>Control Panel</h2>
-        <p>Instruction Pointer (IP): <span id="ipDisplay">0x0000</span></p>
-        <p>Stack Pointer (SP): <span id="spDisplay">0xFFFF</span></p>
+    <!-- Row 1 -->
+    <div style="text-align: left;">
+        <img src="goetheuni.png" alt="FIAS Logo" width="200">
     </div>
-    
+    <div id="reserved" style="text-align: center;">
+        SWEETER16 ASM Simulator
+    </div>
+    <div style="text-align: right;">
+        <img src="fias_logo.png" alt="FIAS Logo" width="200">
+    </div>
+
+    <!-- Row 2 -->
+    <textarea id="InputASM"
+        placeholder=" Paste your ASM program here (use hexadecimal, e.g., #0x6, #0x5 for constants)... "></textarea>
+    <button id="Convert" class="primary-btn">Convert</button>
+    <textarea id="InMemoryProgram" readonly placeholder="Memory-mapped ASM program..."></textarea>
+
     <!-- Row 3 -->
-    <div id="reserved">Reserved for future use...</div>
-    <textarea id="stackDisplay" readonly placeholder="Stack contents..."></textarea>
     <div id="registers">
         <h2>Registers</h2>
         <div id="registerDisplay">
@@ -32,31 +35,39 @@
             <span>R4: 0</span><span>R5: 0</span><span>R6: 0</span><span>R7: 0</span>
         </div>
     </div>
+    <button id="RUN_NEXT" class="primary-btn">Run Next</button>
+    <div id="control-panel">
+        <h2>Control Panel</h2>
+        <p>Instruction Pointer (IP): <span id="ipDisplay">0x0000</span></p>
+        <p>Stack Pointer (SP): <span id="spDisplay">0xFFFF</span></p>
+    </div>
 
+    <!-- Row 4 -->
+    <div id="reserved_LOW">Reserved for future use...</div>
+    <textarea id="stackDisplay" readonly placeholder="Stack contents..."></textarea>
+    <div id="reserved_LOW">Reserved for future use...</div>
+  
     <script src="assembler.js"></script>
     <script src="simulator.js"></script>
     <script>
         // Link Convert button to assembler.js
-	document.getElementById('Convert').addEventListener('click', () => {
-    const inputASM = document.getElementById('InputASM').value;
-    if (!inputASM.trim()) {
-        alert("Please provide an ASM program to convert.");
-        return;
-    }
+        document.getElementById('Convert').addEventListener('click', () => {
+            const inputASM = document.getElementById('InputASM').value;
+            if (!inputASM.trim()) {
+                alert("Please provide an ASM program to convert.");
+                return;
+            }
 
-    try {
-        const assembledProgram = assemble(inputASM); // Convert ASM to JSON
-        document.getElementById('OutputJSON').value = JSON.stringify(assembledProgram, null, 2);
-
-        // Load the assembled program into the simulator
-        loadProgram(assembledProgram);
-    } catch (error) {
-        alert(`Error during assembly: ${error.message}`);
-    }
-});
-        
+            try {
+                const assembledProgram = assemble(inputASM); // Convert ASM to JSON
 
 
+                // Load the assembled program into the simulator
+                loadProgram(assembledProgram);
+            } catch (error) {
+                alert(`Error during assembly: ${error.message}`);
+            }
+        });
 
         // Link RUN_NEXT button to simulator.js
         document.getElementById('RUN_NEXT').addEventListener('click', () => {
@@ -64,4 +75,5 @@
         });
     </script>
 </body>
+
 </html>
