@@ -7,51 +7,217 @@ const registers = new Uint16Array(8); // 8 registers (R0 to R7)
 let instructionPointer = 0x0000; // Program Counter (IP) starts at 0x0000
 let stackPointer = STACK_END; // Stack Pointer (SP) starts at 0xFFFF
 let program = []; // ASM program
+let carryFlag = 0; // 0: no carry, 1: carry
+let zeroFlag = 0;  // 0: no zero result, 1: zero result
 
 // Define instruction set
+const HEX_MASK = 0xFFFF; // Mask to ensure 16-bit values
+
 const instructions = {
-    "LDL": (rd, val) => { registers[rd] = val; },
-    "ADD": (rd, rs, rt) => { registers[rd] = registers[rs] + registers[rt]; },
-    "SUB": (rd, rs, rt) => { registers[rd] = registers[rs] - registers[rt]; },
-    "JNZ": (rd, address) => {
-        if (registers[rd] !== 0) {
-            instructionPointer = address;
-        }
+    "LDL": (rd, val) => { registers[rd] = val & HEX_MASK; },
+    "LDH": (rd, val) => { registers[rd] = ((val << 8) | (registers[rd] & 0x00FF)) & HEX_MASK; },
+    "ADD": (rd, rs, rt) => {
+        const result = registers[rs] + registers[rt];
+        carryFlag = (result > 0xFFFF) ? 1 : 0;
+        registers[rd] = result & 0xFFFF;
+
+        zeroFlag = (registers[rd] === 0) ? 1 : 0;
+
+        // Update the display for carry and zero flags
+        updateFlagsDisplay();
+
+        console.log(`ADD: 0x${registers[rs].toString(16).toUpperCase()} + 0x${registers[rt].toString(16).toUpperCase()} = 0x${registers[rd].toString(16).toUpperCase()}`);
     },
-    "JMP": (address) => { instructionPointer = address; },
+
+
+    "SUB": (rd, rs, rt) => {
+        const result = registers[rs] - registers[rt];
+        carryFlag = (result < 0) ? 1 : 0;  // Handle carry (borrow)
+        registers[rd] = (result & 0xFFFF);
+
+        zeroFlag = (registers[rd] === 0) ? 1 : 0;  // Set zero flag if result is zero
+
+        // Update the display for carry and zero flags
+        updateFlagsDisplay();
+
+        console.log(`SUB: 0x${registers[rs].toString(16).toUpperCase()} - 0x${registers[rt].toString(16).toUpperCase()} = 0x${registers[rd].toString(16).toUpperCase()}`);
+    },
+
+
+    "MUL": (rd, rs, rt) => {
+        const result = registers[rs] * registers[rt];
+
+        // Set carry flag if the result exceeds 16 bits (overflow)
+        carryFlag = (result > 0xFFFF) ? 1 : 0;
+
+        registers[rd] = result & 0xFFFF;  // Ensure result fits within 16-bit register
+
+        // Set zero flag if the result is zero
+        zeroFlag = (registers[rd] === 0) ? 1 : 0;
+
+        // Update the display for carry and zero flags
+        updateFlagsDisplay();
+
+        console.log(`MUL: 0x${registers[rs].toString(16).toUpperCase()} * 0x${registers[rt].toString(16).toUpperCase()} = 0x${registers[rd].toString(16).toUpperCase()}`);
+    },
+
+    "DIV": (rd, rs, rt) => {
+        if (registers[rt] === 0) {
+            throw new Error("Division by zero error!");
+        }
+
+        const result = Math.floor(registers[rs] / registers[rt]);
+        const remainder = registers[rs] % registers[rt];
+
+        // Set carry flag if there's a remainder (non-zero)
+        carryFlag = (remainder !== 0) ? 1 : 0;
+
+        registers[rd] = result & 0xFFFF;  // Ensure result fits within 16-bit register
+
+        // Set zero flag if the quotient is zero
+        zeroFlag = (registers[rd] === 0) ? 1 : 0;
+
+        // Update the display for carry and zero flags
+        updateFlagsDisplay();
+
+        console.log(`DIV: 0x${registers[rs].toString(16).toUpperCase()} / 0x${registers[rt].toString(16).toUpperCase()} = 0x${registers[rd].toString(16).toUpperCase()}`);
+    },
+
+
+    "CMP": (rs, rt) => {
+        const result = registers[rs] - registers[rt];
+
+        // Set carry flag if there is no borrow (result >= 0)
+        carryFlag = (result >= 0) ? 0 : 1;  // If result is negative, set carry flag
+
+        // Set zero flag if result is zero (i.e., registers are equal)
+        zeroFlag = (result === 0) ? 1 : 0;
+
+        // Update the display for carry and zero flags
+        updateFlagsDisplay();
+
+        console.log(`CMP: 0x${registers[rs].toString(16).toUpperCase()} - 0x${registers[rt].toString(16).toUpperCase()} = 0x${result.toString(16).toUpperCase()}`);
+    },
+
+
+
+    "ADC": (rd, rs, rt) => { registers[rd] = (registers[rs] + registers[rt] + (registers[rd] & 1)) & HEX_MASK; },
+    "SBB": (rd, rs, rt) => { registers[rd] = (registers[rs] - registers[rt] - (registers[rd] & 1)) & HEX_MASK; },
+    "NOT": (rd) => { registers[rd] = ~registers[rd] & HEX_MASK; },
+    "SWP": (rd, rs) => { [registers[rd], registers[rs]] = [registers[rs], registers[rd]]; },
+    "XOR": (rd, rs, rt) => { registers[rd] = (registers[rs] ^ registers[rt]) & HEX_MASK; },
+    "OR": (rd, rs, rt) => { registers[rd] = (registers[rs] | registers[rt]) & HEX_MASK; },
+    "AND": (rd, rs, rt) => { registers[rd] = (registers[rs] & registers[rt]) & HEX_MASK; },
+    "MKB": (rd, rs, mask) => { registers[rd] = (registers[rs] & mask) & HEX_MASK; },
+    "INB": (rd, rs, mask) => { registers[rd] = (registers[rs] ^ mask) & HEX_MASK; },
+    "SEB": (rd, rs, mask) => { registers[rd] = (registers[rs] | mask) & HEX_MASK; },
+    "CLB": (rd, rs, mask) => { registers[rd] = (registers[rs] & ~mask) & HEX_MASK; },
+
+    // SHL instruction (Shift Left)
+    "SHL": (rd) => {
+        const carryOut = (registers[rd] & 0x8000) >> 15;  // Capture the leftmost bit (Carry)
+        registers[rd] = (registers[rd] << 1) & HEX_MASK;  // Perform the left shift
+        carryFlag = carryOut;  // Set the Carry Flag
+        zeroFlag = (registers[rd] === 0) ? 1 : 0;  // Set Zero Flag if result is zero
+        updateFlagsDisplay();  // Update the flags display
+    },
+
+    // SHR instruction (Shift Right)
+    "SHR": (rd) => {
+        const carryOut = registers[rd] & 0x1;  // Capture the rightmost bit (Carry)
+        registers[rd] = (registers[rd] >> 1) & HEX_MASK;  // Perform the right shift
+        carryFlag = carryOut;  // Set the Carry Flag
+        zeroFlag = (registers[rd] === 0) ? 1 : 0;  // Set Zero Flag if result is zero
+        updateFlagsDisplay();  // Update the flags display
+    },
+
+    // ROL instruction (Rotate Left)
+    "ROL": (rd) => {
+        const carryOut = (registers[rd] & 0x8000) >> 15;  // Capture the leftmost bit (Carry)
+        registers[rd] = ((registers[rd] << 1) | (registers[rd] >> 15)) & HEX_MASK;  // Rotate left
+        carryFlag = carryOut;  // Set the Carry Flag
+        zeroFlag = (registers[rd] === 0) ? 1 : 0;  // Set Zero Flag if result is zero
+        updateFlagsDisplay();  // Update the flags display
+    },
+
+    // ROR instruction (Rotate Right)
+    "ROR": (rd) => {
+        const carryOut = registers[rd] & 0x1;  // Capture the rightmost bit (Carry)
+        registers[rd] = ((registers[rd] >> 1) | (registers[rd] << 15)) & HEX_MASK;  // Rotate right
+        carryFlag = carryOut;  // Set the Carry Flag
+        zeroFlag = (registers[rd] === 0) ? 1 : 0;  // Set Zero Flag if result is zero
+        updateFlagsDisplay();  // Update the flags display
+    },
+
+    // LDD instruction (Load from Memory)
+    "LDD": (rd, address) => {
+        registers[rd] = memory[address] & HEX_MASK;  // Load the value from memory into the register
+
+        // Set Zero Flag if the value loaded is zero
+        zeroFlag = (registers[rd] === 0) ? 1 : 0;
+
+        // Update the display for carry and zero flags
+        updateFlagsDisplay();
+
+        console.log(`LDD: Loaded 0x${memory[address].toString(16).toUpperCase()} into R${rd}`);
+    },
+
+
+    "STO": (address, rs) => { memory[address] = registers[rs] & HEX_MASK; },
+    "OUT": (address, rs) => { console.log(`Output at 0x${address.toString(16)}: 0x${registers[rs].toString(16).toUpperCase()}`); },
+    "IN": (rd, address) => { registers[rd] = memory[address] & HEX_MASK; },
     "PSH": (rs) => {
         if (stackPointer <= STACK_START) {
             alert("Stack Overflow!");
             return;
         }
-        memory[stackPointer] = registers[rs];
-        stackPointer--;  // Decrement after writing the value
+        memory[stackPointer--] = registers[rs] & HEX_MASK;
     },
     "POP": (rd) => {
         if (stackPointer >= STACK_END) {
             alert("Stack Underflow!");
             return;
         }
-        stackPointer++;  // Increment before reading
-        if (stackPointer > STACK_END) {
-            alert("Stack Overflow!");
-            return;
+
+
+        registers[rd] = memory[++stackPointer] & HEX_MASK;
+    },
+
+    "JS": (address) => { memory[--stackPointer] = instructionPointer & HEX_MASK; instructionPointer = address; },
+    "JNZ": (rd, address) => {
+        if (registers[rd] !== 0) {
+            instructionPointer = address;
         }
-        registers[rd] = memory[stackPointer];
     },
     "RTS": () => {
         if (stackPointer >= STACK_END) {
             alert("Stack Underflow!");
             return;
         }
-        stackPointer++;  // Increment before reading
-        if (stackPointer > STACK_END) {
-            alert("Stack Overflow!");
-            return;
-        }
-        instructionPointer = memory[stackPointer];
-    }
+        instructionPointer = memory[++stackPointer] & HEX_MASK;
+    },
+    "HLT": () => {
+        console.log("Halting the program");
+        // You can add any necessary termination logic here, if needed.
+    },
+
+    "RTI": () => { instructionPointer = memory[++stackPointer] & HEX_MASK; },
+    "BRA": (cond, offset) => { if (evaluateCondition(cond)) instructionPointer = (instructionPointer + offset) & HEX_MASK; }
+
+
+
 };
+
+
+function updateFlagsDisplay() {
+    // Update the Carry Flag display
+    const carryFlagDisplay = document.getElementById('carryFlagDisplay');
+    carryFlagDisplay.textContent = carryFlag === 1 ? '1' : '0';
+
+    // Update the Zero Flag display
+    const zeroFlagDisplay = document.getElementById('zeroFlagDisplay');
+    zeroFlagDisplay.textContent = zeroFlag === 1 ? '1' : '0';
+}
 
 // Load a sample program into memory
 function loadProgram(assembledProgram) {
@@ -81,27 +247,46 @@ function loadProgram(assembledProgram) {
 // Display register values
 function updateRegisterDisplay() {
     const registerDisplay = document.getElementById('registerDisplay');
-    registerDisplay.innerHTML = `
-        <span>R0: ${registers[0]}</span><span>R1: ${registers[1]}</span>
-        <span>R2: ${registers[2]}</span><span>R3: ${registers[3]}</span><br>
-        <span>R4: ${registers[4]}</span><span>R5: ${registers[5]}</span>
-        <span>R6: ${registers[6]}</span><span>R7: ${registers[7]}</span>
-    `;
+    registerDisplay.innerHTML = ''; // Clear existing content
+
+    registers.forEach((value, index) => {
+        const registerElement = document.createElement('span');
+        registerElement.innerHTML = `
+            R${index}: 
+            <span style="font-size: larger; color: blue;">0x${value.toString(16).toUpperCase()}</span> 
+            (<span style="font-size: smaller; color: red;">${value}</span>)
+        `;
+        registerDisplay.appendChild(registerElement);
+
+        // Add a line break after every 4 registers for better readability
+        if ((index + 1) % 4 === 0) {
+            registerDisplay.appendChild(document.createElement('br'));
+        }
+    });
 }
+
+
+
+
 
 // Display memory contents, highlighting IP and SP
 function updateMemoryDisplay() {
     const programDisplay = document.getElementById('InMemoryProgram');
     const stackDisplay = document.getElementById('stackDisplay');
-    
+
     // Update program memory
     const displayRange = program.length; // Adjust to program size
     let programContent = '';
 
     for (let i = 0; i < displayRange; i++) {
-        const address = i.toString(16).padStart(4, '0').toUpperCase();
+        const address = i.toString(16).padStart(4, '0').toUpperCase(); // Hexadecimal address
         const instruction = program[i];
-        let line = `${address}: ${instruction?.op || ''} ${instruction?.args?.join(', ') || ''}`;
+        const instructionHex = instruction?.op || ''; // Instruction mnemonic
+        const argsHex = instruction?.args.map(arg => `0x${arg.toString(16).toUpperCase()}`).join(', ') || ''; // Hexadecimal args
+        const argsDec = instruction?.args.join(', ') || ''; // Decimal args
+
+        // Format each line with both hex and decimal values
+        let line = `${address}: ${instructionHex} ${argsHex} (${argsDec})`;
 
         // Highlight the current instruction pointer (IP)
         if (i === instructionPointer) {
@@ -117,12 +302,13 @@ function updateMemoryDisplay() {
     let stackContent = '';
     for (let i = STACK_END; i >= STACK_END - 15; i--) {
         const value = memory[i] || '0000'; // Default to 0000 if no value is present
-        const line = `0x${i.toString(16).toUpperCase().padStart(4, '0')}: ${value}`;
-        stackContent += line + '\n';
+        const hexValue = `0x${value.toString(16).toUpperCase()}`; // Hexadecimal value
+        stackContent += `0x${i.toString(16).toUpperCase().padStart(4, '0')}: ${hexValue} (${parseInt(value, 16)})\n`;
     }
 
     stackDisplay.value = stackContent.trim();
 }
+
 
 
 
@@ -169,11 +355,29 @@ function executeNext() {
 
 // Initialize the simulator
 function initialize() {
-    loadProgram();
+    const defaultProgram = [
+        { op: "LDL", args: [0, 5] }, // Load the value 5 into register R0
+        { op: "LDL", args: [1, 10] }, // Load the value 10 into register R1
+        { op: "ADD", args: [2, 0, 1] } // Add R0 and R1, store the result in R2
+    ];
+
+    // Convert the default program to ASM text
+    const asmText = `
+LDL R0, #0x5
+LDL R1, #0xA
+ADD R2, R0, R1`.trim(); // Use hexadecimal constants for consistency with the program.
+
+    // Populate the InputASM textarea
+    const inputAsmTextarea = document.getElementById('InputASM');
+    inputAsmTextarea.value = asmText;
+
+    // Load the default program into the simulator
+    loadProgram(defaultProgram);
     updateRegisterDisplay();
     updateMemoryDisplay();
     updateControlPanel();
 }
+
 
 // Start the simulation
 initialize();

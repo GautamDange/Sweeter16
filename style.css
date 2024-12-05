@@ -113,28 +113,41 @@ button:active {
 
 /* Registers */
 #registers {
-    width: 100%;
-    padding: 15px;
-    margin: auto;
-    background-color: #f8f9fa;
-    border: 1px solid #ced4da;
-    border-radius: 10px;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    font-family: Arial, sans-serif;
+    margin: 20px;
 }
 
 #registers h2 {
-    margin-bottom: 15px;
-    font-size: 1.4rem;
-    color: #007BFF;
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: #333;
 }
 
-#registerDisplay span {
-    margin-right: 15px;
-    display: inline-block;
-    width: 80px;
-    font-size: 1rem;
-    color: #495057;
+#registerDisplay {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* Four columns */
+    gap: 10px; /* Space between registers */
+    justify-items: center;
 }
+
+.register {
+    padding: 10px 20px;
+    background-color: #f9f9f9; /* Light background for contrast */
+    border: 2px solid #ddd; /* Border for definition */
+    border-radius: 8px; /* Rounded corners for modern look */
+    font-size: 1rem;
+    font-weight: bold;
+    color: #444; /* Text color */
+    transition: transform 0.2s, background-color 0.2s; /* Hover effects */
+}
+
+.register:hover {
+    transform: scale(1.05); /* Slight zoom on hover */
+    background-color: #e0e0e0; /* Subtle hover color */
+    cursor: pointer;
+}
+
 
 /* Stack Display */
 #stackDisplay {
@@ -179,6 +192,8 @@ button:active {
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 
 }
+
+
 
 /* Responsive Design */
 @media (max-width: 768px) {

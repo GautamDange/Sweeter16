@@ -30,16 +30,29 @@
     <div id="registers">
         <h2>Registers</h2>
         <div id="registerDisplay">
-            <span>R0: 0</span><span>R1: 0</span><span>R2: 0</span><span>R3: 0</span>
-            <br>
-            <span>R4: 0</span><span>R5: 0</span><span>R6: 0</span><span>R7: 0</span>
+            <div class="register">R0: 0</div>
+            <div class="register">R1: 0</div>
+            <div class="register">R2: 0</div>
+            <div class="register">R3: 0</div>
+            <div class="register">R4: 0</div>
+            <div class="register">R5: 0</div>
+            <div class="register">R6: 0</div>
+            <div class="register">R7: 0</div>
         </div>
     </div>
+    
     <button id="RUN_NEXT" class="primary-btn">Run Next</button>
     <div id="control-panel">
         <h2>Control Panel</h2>
+        <h2>Control Panel</h2>
         <p>Instruction Pointer (IP): <span id="ipDisplay">0x0000</span></p>
         <p>Stack Pointer (SP): <span id="spDisplay">0xFFFF</span></p>
+    
+        <!-- Add Carry Flag Display -->
+        <p>Carry Flag (CF): <span id="carryFlagDisplay">0</span></p>
+    
+        <!-- Add Zero Flag Display -->
+        <p>Zero Flag (ZF): <span id="zeroFlagDisplay">0</span></p>
     </div>
 
     <!-- Row 4 -->

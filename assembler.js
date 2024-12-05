@@ -3,6 +3,8 @@
 const instructionSet = {
     "ADD": { params: 3, types: ["R", "R", "R"] },   // Add two registers into a destination register
     "SUB": { params: 3, types: ["R", "R", "R"] },   // Subtract two registers into a destination register
+    "DIV": { "params": 3, "types": ["R", "R", "R"] },//  Division
+    "MUL": { "params": 3, "types": ["R", "R", "R"] }, // Multiplication
     "ADC": { params: 3, types: ["R", "R", "R"] },   // Add with carry
     "SBB": { params: 3, types: ["R", "R", "R"] },   // Subtract with borrow
     "NOT": { params: 2, types: ["R", "R"] },        // Logical NOT
@@ -26,15 +28,17 @@ const instructionSet = {
     "IN": { params: 2, types: ["R", "MR"] },        // Input from memory (I/O) to a register
     "PSH": { params: 1, types: ["R"] },             // Push register value onto the stack
     "POP": { params: 1, types: ["R"] },             // Pop value from the stack into a register
-    "JZ": { params: 2, types: ["R", "AD"] },        // Jump if zero
-    "JC": { params: 2, types: ["R", "AD"] },        // Jump if carry
+    "JZ": { params: 1, types: ["AD"] },             // Jump if zero
+    "JC": { params: 1, types: ["AD"] },             // Jump if carry
     "JNZ": { params: 2, types: ["R", "AD"] },       // Jump if not zero
-    "JNC": { params: 2, types: ["R", "AD"] },       // Jump if not carry
+    "JNC": { params: 2, types: ["AD"] },            // Jump if not carry
     "JS": { params: 1, types: ["AD"] },             // Jump to subroutine
     "JMP": { params: 1, types: ["AD"] },            // Unconditional jump
     "RTS": { params: 0 },                           // Return from subroutine
     "RTI": { params: 0 },                           // Return from interrupt
-    "BRA": { params: 2, types: ["COND", "O"] }      // Branch with condition
+    "BRA": { params: 2, types: ["COND", "O"] },     // Branch with condition
+    "CMP": { params: 2, types: ["R", "R"] },
+    "HLT": { params: 0, types: [] }
 };
 
 
