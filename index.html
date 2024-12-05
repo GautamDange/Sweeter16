@@ -9,25 +9,30 @@
 </head>
 
 <body>
-    <!-- Row 1 -->
-    <div style="text-align: left;">
+
+    <div id="row_1_col_1" style="text-align: left;">
         <img src="goetheuni.png" alt="FIAS Logo" width="200">
     </div>
-    <div id="reserved" style="text-align: center;">
+    <div id="row_1_col_2" style="text-align: center;">
         SWEETER16 ASM Simulator
     </div>
-    <div style="text-align: right;">
+    <div id="row_1_col_3" style="text-align: right;">
         <img src="fias_logo.png" alt="FIAS Logo" width="200">
     </div>
 
-    <!-- Row 2 -->
-    <textarea id="InputASM"
-        placeholder=" Paste your ASM program here (use hexadecimal, e.g., #0x6, #0x5 for constants)... "></textarea>
-    <button id="Convert" class="primary-btn">Convert</button>
-    <textarea id="InMemoryProgram" readonly placeholder="Memory-mapped ASM program..."></textarea>
 
-    <!-- Row 3 -->
-    <div id="registers">
+    <div id="row_2_col_1">
+        <textarea id="InputASM"
+            placeholder=" Paste your ASM program here (use hexadecimal, e.g., #0x6, #0x5 for constants)... "></textarea>
+    </div>
+    <div id="row_2_col_2">
+        <button id="Convert" class="primary-btn">Convert</button>
+    </div>
+    <div id="row_2_col_3">
+        <textarea id="InMemoryProgram" readonly placeholder="Memory-mapped ASM program..."></textarea>
+    </div>
+
+    <div id="row_3_col_1">
         <h2>Registers</h2>
         <div id="registerDisplay">
             <div class="register">R0: 0</div>
@@ -40,26 +45,42 @@
             <div class="register">R7: 0</div>
         </div>
     </div>
-    
-    <button id="RUN_NEXT" class="primary-btn">Run Next</button>
-    <div id="control-panel">
-        <h2>Control Panel</h2>
-        <h2>Control Panel</h2>
-        <p>Instruction Pointer (IP): <span id="ipDisplay">0x0000</span></p>
-        <p>Stack Pointer (SP): <span id="spDisplay">0xFFFF</span></p>
-    
-        <!-- Add Carry Flag Display -->
-        <p>Carry Flag (CF): <span id="carryFlagDisplay">0</span></p>
-    
-        <!-- Add Zero Flag Display -->
-        <p>Zero Flag (ZF): <span id="zeroFlagDisplay">0</span></p>
+
+    <div id="row_3_col_2">
+        <button id="RUN_NEXT" class="primary-btn">Run Next</button>
+        <button id="addMemoryContent" class="primary-btn">Add Memory Content</button>
     </div>
 
-    <!-- Row 4 -->
-    <div id="reserved_LOW">Reserved for future use...</div>
-    <textarea id="stackDisplay" readonly placeholder="Stack contents..."></textarea>
-    <div id="reserved_LOW">Reserved for future use...</div>
-  
+    <div id="row_3_col_3">
+    <div id="sub_left">
+        <textarea id="dynamicMemoryContentsForUser" placeholder="200:20 will add content 20 at memory address 0200H">
+        </textarea>
+    </div>
+        <div id="sub_right">
+            <h2>Control Panel</h2>
+            <p>Instruction Pointer (IP): <span id="ipDisplay">0x0000</span></p>
+            <p>Stack Pointer (SP): <span id="spDisplay">0xFFFF</span></p>
+            <p>Carry Flag (CF): <span id="carryFlagDisplay">0</span></p>
+            <p>Zero Flag (ZF): <span id="zeroFlagDisplay">0</span></p>
+        </div>
+    </div>
+
+    <div id="row_4_col_1">
+        <textarea id="reserved_LOW">readonly placeholder="Reserved for future use.."</textarea>
+    </div>
+    <div id="row_4_col_2">
+        <textarea id="dynamicmemorydisplay" readonly placeholder="dynamice memory contents..."></textarea>
+    </div>
+    <div id="row_4_col_3">
+        <textarea id="stackDisplay" readonly placeholder="Stack contents..."></textarea>
+    </div>
+
+
+
+
+
+
+
     <script src="assembler.js"></script>
     <script src="simulator.js"></script>
     <script>

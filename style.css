@@ -18,6 +18,50 @@ body {
     box-sizing: border-box;
 }
 
+#row_3_col_3 {
+    display: flex;
+    justify-content: space-between; /* Adds space between the two sections */
+    align-items: flex-start; /* Aligns items at the top */
+    gap: 10px; /* Optional: Adds spacing between the sections */
+    padding: 10px;
+    border: 1px solid #ccc; /* Optional: Adds a border around the container */
+    background-color: #f9f9f9; /* Optional: Background for the container */
+}
+
+#sub_left {
+    flex: 1; /* Adjust size to share space equally */
+    margin-right: 10px; /* Adds space to the right of sub_left */
+}
+
+#dynamicMemoryContentsForUser {
+    width: 100%; /* Ensures textarea fills the space */
+    height: 150px; /* Set height for textarea */
+    font-size: 14px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    resize: none; /* Prevent resizing */
+    box-sizing: border-box; /* Ensures padding is included in the width */
+}
+
+#sub_right {
+    flex: 1; /* Adjust size to share space equally */
+    font-family: Arial, sans-serif;
+}
+
+#sub_right h2 {
+    margin: 0 0 10px;
+}
+
+#sub_right p {
+    margin: 5px 0;
+}
+
+#sub_right span {
+    font-weight: bold;
+    color: #333;
+}
+
+
 /* Textareas */
 textarea {
     width: 100%;
@@ -124,6 +168,12 @@ button:active {
     color: #333;
 }
 
+#dynamicMemoryContentsForUser
+{
+    width: 90%;
+    height: 90%;
+}
+
 #registerDisplay {
     display: grid;
     grid-template-columns: repeat(4, 1fr); /* Four columns */
@@ -206,10 +256,10 @@ button:active {
     #registers,
     #stackDisplay,
     #control-panel {
-        width: 95%;
+        width: 50%;
     }
 
     button {
-        width: 90%;
+        width: 50%;
     }
 }

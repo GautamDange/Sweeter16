@@ -9,9 +9,51 @@ let stackPointer = STACK_END; // Stack Pointer (SP) starts at 0xFFFF
 let program = []; // ASM program
 let carryFlag = 0; // 0: no carry, 1: carry
 let zeroFlag = 0;  // 0: no zero result, 1: zero result
+const memoryInput = document.getElementById('dynamicMemoryContentsForUser');
+const addMemoryButton = document.getElementById('addMemoryContent');
 
 // Define instruction set
 const HEX_MASK = 0xFFFF; // Mask to ensure 16-bit values
+
+// Event listener for the Add Memory Content button
+addMemoryButton.addEventListener('click', () => {
+    const inputValue = memoryInput.value.trim();
+    
+    // Ensure the input is not empty
+    if (!inputValue) {
+        alert("Please provide a memory address and content.");
+        return;
+    }
+
+    // Split the input into memory address and content
+    const [address, content] = inputValue.split(':').map(str => str.trim());
+
+    // Validate the input format (address and content should be hexadecimal numbers)
+    if (!address.match(/^[0-9A-Fa-f]+$/) || !content.match(/^[0-9A-Fa-f]+$/)) {
+        alert("Invalid input format. Please use the format 'address:content', e.g., 200:20.");
+        return;
+    }
+
+    // Convert address and content to integers (as hex)
+    const memoryAddress = parseInt(address, 16); // Convert address to hexadecimal
+    const memoryContent = parseInt(content, 16); // Convert content to hexadecimal
+
+    // Ensure the address is within valid memory range
+    if (memoryAddress < 0 || memoryAddress >= MEMORY_SIZE) {
+        alert(`Invalid memory address. Please enter a value between 0 and ${MEMORY_SIZE - 1}.`);
+        return;
+    }
+
+    // Store the content at the specified memory address
+    memory[memoryAddress] = memoryContent;
+
+    // Update the dynamic memory display
+    updateDynamicMemoryDisplay();
+
+    // Optionally show an alert to confirm the memory update
+    alert(`Memory at address 0x${memoryAddress.toString(16).toUpperCase()} updated to 0x${memoryContent.toString(16).toUpperCase()}`);
+});
+
 
 const instructions = {
     "LDL": (rd, val) => { registers[rd] = val & HEX_MASK; },
@@ -278,6 +320,7 @@ function updateMemoryDisplay() {
     const displayRange = program.length; // Adjust to program size
     let programContent = '';
 
+    // Iterate through the program memory
     for (let i = 0; i < displayRange; i++) {
         const address = i.toString(16).padStart(4, '0').toUpperCase(); // Hexadecimal address
         const instruction = program[i];
@@ -296,6 +339,7 @@ function updateMemoryDisplay() {
         programContent += line + '\n';
     }
 
+    // Update the program display (textarea)
     programDisplay.value = programContent.trim();
 
     // Update stack memory
@@ -306,11 +350,30 @@ function updateMemoryDisplay() {
         stackContent += `0x${i.toString(16).toUpperCase().padStart(4, '0')}: ${hexValue} (${parseInt(value, 16)})\n`;
     }
 
+    // Update the stack display (textarea)
     stackDisplay.value = stackContent.trim();
 }
 
 
+// Function to update the dynamic memory display
+function updateDynamicMemoryDisplay() {
+    const dynamicMemoryDisplay = document.getElementById('dynamicmemorydisplay');
+    let dynamicMemoryContent = '';
 
+    // Show a selected range of memory addresses and their content
+    const rangeToShow = 16; // Show the first 16 memory locations (you can adjust this if needed)
+    for (let i = 0; i < rangeToShow; i++) {
+        const address = i.toString(16).padStart(4, '0').toUpperCase(); // Hexadecimal address
+        const value = memory[i] || '0000'; // Default to '0000' if no value is set
+        const hexValue = `0x${value.toString(16).toUpperCase()}`; // Hexadecimal value
+
+        // Format the line for each address and content
+        dynamicMemoryContent += `0x${address}: ${hexValue} (${parseInt(value, 16)})\n`;
+    }
+
+    // Update the dynamic memory display with the formatted content
+    dynamicMemoryDisplay.value = dynamicMemoryContent.trim();
+}
 
 
 // Display control panel values (IP, SP)
