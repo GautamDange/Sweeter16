@@ -23,11 +23,14 @@ const instructionSet = {
     "LDL": { params: 2, types: ["R", "C"] },        // Load a constant into a register
     "LDH": { params: 2, types: ["R", "C"] },        // Load high byte of a constant into a register
     "LDD": { params: 2, types: ["R", "MR"] },       // Load from memory (by register) into a register
-    "STO": { params: 2, types: ["MR", "R"] },       // Store register value into memory (by register)
+    "STO": { params: 2, types: ["MR", "R"] },
+
     "OUT": { params: 2, types: ["MR", "R"] },       // Output register value to memory (I/O)
     "IN": { params: 2, types: ["R", "MR"] },        // Input from memory (I/O) to a register
-    "PSH": { params: 1, types: ["R"] },             // Push register value onto the stack
-    "POP": { params: 1, types: ["R"] },             // Pop value from the stack into a register
+
+    "PSH": { params: 1, types: ["R"] },
+    "POP": { params: 1, types: ["R"] },
+
     "JZ": { params: 1, types: ["AD"] },             // Jump if zero
     "JC": { params: 1, types: ["AD"] },             // Jump if carry
     "JNZ": { params: 2, types: ["R", "AD"] },       // Jump if not zero
@@ -65,8 +68,12 @@ const parseOperand = (operand, type, labels) => {
     if (type === "AD" && operand.match(/^0x[0-9A-Fa-f]+$/)) {
         return parseInt(operand, 16); // Hexadecimal address (e.g., 0x0004)
     }
+    if (type === "MR" && operand.match(/^0x[0-9A-Fa-f]+$/)) {
+        return parseInt(operand, 16); // Memory address (e.g., 0x0010)
+    }
     throw new Error(`Invalid operand "${operand}" for expected type: ${type}`);
 };
+
 
 
 

@@ -48,13 +48,15 @@
 
     <div id="row_3_col_2">
         <button id="RUN_NEXT" class="primary-btn">Run Next</button>
-        <button id="addMemoryContent" class="primary-btn">Add Memory Content</button>
+       
     </div>
 
     <div id="row_3_col_3">
     <div id="sub_left">
-        <textarea id="dynamicMemoryContentsForUser" placeholder="200:20 will add content 20 at memory address 0200H">
+        <textarea id="dynamicMemoryContentsForUser" 
+        placeholder="(0x0005: 20)  will add content 20 at memory address 0005H">
         </textarea>
+        <button id="addMemoryContent" class="primary-btn">Add Memory Content</button>
     </div>
         <div id="sub_right">
             <h2>Control Panel</h2>
@@ -69,11 +71,12 @@
         <textarea id="reserved_LOW">readonly placeholder="Reserved for future use.."</textarea>
     </div>
     <div id="row_4_col_2">
-        <textarea id="dynamicmemorydisplay" readonly placeholder="dynamice memory contents..."></textarea>
-    </div>
-    <div id="row_4_col_3">
         <textarea id="stackDisplay" readonly placeholder="Stack contents..."></textarea>
     </div>
+    <div id="row_4_col_3">
+        <textarea id="dynamicmemorydisplay" readonly placeholder="dynamice memory contents..."></textarea>
+    </div>
+  
 
 
 
