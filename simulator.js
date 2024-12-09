@@ -35,25 +35,28 @@ addMemoryButton.addEventListener('click', () => {
     // Split the input into memory address and content
     const [address, content] = inputValue.split(':').map(str => str.trim());
 
-    // Validate the input format (address and content should be hexadecimal numbers)
-    if (!address.match(/^[0-9A-Fa-f]+$/) || !content.match(/^[0-9A-Fa-f]+$/)) {
-        alert("Invalid input format. Please use the format 'address:content', e.g., 200:20.");
+    // Validate the input format (address and content should be in hexadecimal)
+    if (!address.match(/^[0-9A-Fa-f]+$/)) {
+        alert("Invalid memory address format. Please use hexadecimal format for address (e.g., 0x0000).");
         return;
     }
 
-    // Convert address and content to integers (as hex)
-    const memoryAddress = parseInt(address, 16); // Convert address to hexadecimal
-    const memoryContent = parseInt(content, 16); // Convert content to hexadecimal
+    // Check if content is in hexadecimal format
+    if (!content.match(/^[0-9A-Fa-f]+$/)) {
+        alert("Invalid content format. Please enter the content in hexadecimal format (e.g., 0xA for hexadecimal).");
+        return;
+    }
+
+    // Convert address to hexadecimal
+    const memoryAddress = parseInt(address, 16); // Convert address to hex
+
+    // Convert content to hexadecimal
+    let memoryContent = parseInt(content, 16); // Treat content as hexadecimal value
 
     // Ensure the address is within valid memory range
     if (memoryAddress < 0 || memoryAddress >= MEMORY_SIZE) {
         alert(`Invalid memory address. Please enter a value between 0 and ${MEMORY_SIZE - 1}.`);
         return;
-    }
-
-    // Ensure the content is valid (reset to 0x0000 if not provided or invalid)
-    if (isNaN(memoryContent)) {
-        memoryContent = 0x0000; // Default to 0x0000 if the content is not a valid number
     }
 
     // Store the content at the specified memory address
@@ -63,13 +66,30 @@ addMemoryButton.addEventListener('click', () => {
     updateDynamicMemoryDisplay();
 
     // Optionally show an alert to confirm the memory update
-    alert(`Memory at address 0x${memoryAddress.toString(16).toUpperCase()} updated to 0x${memoryContent.toString(16).toUpperCase()}`);
+    alert(`Memory at address 0x${memoryAddress.toString(16).toUpperCase()} updated to 0x${memoryContent.toString(16).toUpperCase()} (decimal: ${memoryContent})`);
 });
 
 
 
 const instructions = {
-    "LDL": (rd, val) => { registers[rd] = val & HEX_MASK; },
+    "LDL": (rd, address) => {
+        // Ensure the address is within the memory range
+        if (address < MEMORY_START || address >= MEMORY_SIZE) {
+            throw new Error(`Invalid memory address: 0x${address.toString(16).toUpperCase()}`);
+        }
+
+        // Load the content at the memory address into the register
+        registers[rd] = memory[address] & HEX_MASK;
+
+        // Set the zero flag if the value loaded is zero
+        zeroFlag = (registers[rd] === 0) ? 1 : 0;
+
+        // Update flags display
+        updateFlagsDisplay();
+
+        console.log(`LDL: Loaded 0x${memory[address].toString(16).toUpperCase()} from memory address 0x${address.toString(16).toUpperCase()} into R${rd}`);
+    },
+
     "LDH": (rd, val) => { registers[rd] = ((val << 8) | (registers[rd] & 0x00FF)) & HEX_MASK; },
     "ADD": (rd, rs, rt) => {
         const result = registers[rs] + registers[rt];
@@ -392,7 +412,6 @@ function updateMemoryDisplay() {
 }
 
 
-
 function updateDynamicMemoryDisplay() {
     const dynamicMemoryDisplay = document.getElementById('dynamicmemorydisplay');
     let dynamicMemoryContent = '';
@@ -401,18 +420,19 @@ function updateDynamicMemoryDisplay() {
     const rangeToShow = 16; // Show the first 16 memory locations (you can adjust this if needed)
     for (let i = 0; i < rangeToShow; i++) {
         const address = i.toString(16).padStart(4, '0').toUpperCase(); // Hexadecimal address
-        const value = memory[i] || 0x0000; // Default to 0x0000 if no value is set, using a hex number instead of a string
-        const hexValue = `0x${value.toString(16).toUpperCase()}`; // Hexadecimal value with template literals
+        const value = memory[i] || 0x0000; // Default to 0x0000 if no value is set
+        const hexValue = `0x${value.toString(16).toUpperCase()}`; // Hexadecimal value
+
+        // To show decimal value: parse the value directly (as it's in hex internally)
+        const decimalValue = parseInt(value.toString(16), 16); // Convert from hex to decimal for display
 
         // Format the line for each address and content
-        dynamicMemoryContent += `0x${address}: ${hexValue} (${parseInt(value, 16)})\n`;
+        dynamicMemoryContent += `0x${address}: ${hexValue} (${decimalValue})\n`; // Show both hex and decimal
     }
 
     // Update the dynamic memory display with the formatted content
     dynamicMemoryDisplay.value = dynamicMemoryContent.trim();
 }
-
-
 
 // Display control panel values (IP, SP)
 function updateControlPanel() {
