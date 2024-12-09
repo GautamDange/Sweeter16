@@ -16,10 +16,17 @@ const instructionSet = {
     "INB": { params: 3, types: ["R", "R", "C"] },   // Invert a bit
     "SEB": { params: 3, types: ["R", "R", "C"] },   // Set a bit
     "CLB": { params: 3, types: ["R", "R", "C"] },   // Clear a bit
-    "SHL": { params: 2, types: ["R", "R"] },        // Shift left
-    "SHR": { params: 2, types: ["R", "R"] },        // Shift right
-    "ROL": { params: 2, types: ["R", "R"] },        // Rotate left
-    "ROR": { params: 2, types: ["R", "R"] },        // Rotate right
+
+    "SHL": { params: 1, types: ["R"] },        // Shift left
+    "SHR": { params: 1, types: ["R"] },        // Shift right
+    "ROL": { params: 1, types: ["R"] },        // Rotate left
+    "ROR": { params: 1, types: ["R"] },        // Rotate right
+
+    "SHLC": { params: 2, types: ["R", "R"] },        // Shift left
+    "SHRC": { params: 2, types: ["R", "R"] },        // Shift right
+    "ROLC": { params: 2, types: ["R", "R"] },        // Rotate left
+    "RORC": { params: 2, types: ["R", "R"] },        // Rotate right
+
     "LDL": { params: 2, types: ["R", "C"] },        // Load a constant into a register
     "LDH": { params: 2, types: ["R", "C"] },        // Load high byte of a constant into a register
     "LDD": { params: 2, types: ["R", "MR"] },       // Load from memory (by register) into a register
@@ -33,10 +40,11 @@ const instructionSet = {
 
     "JZ": { params: 1, types: ["AD"] },             // Jump if zero
     "JC": { params: 1, types: ["AD"] },             // Jump if carry
-    "JNZ": { params: 2, types: ["R", "AD"] },       // Jump if not zero
-    "JNC": { params: 2, types: ["AD"] },            // Jump if not carry
+    "JNZ": { params: 1, types: ["AD"] },            // Jump if not zero
+    "JNC": { params: 1, types: ["AD"] },            // Jump if not carry
     "JS": { params: 1, types: ["AD"] },             // Jump to subroutine
     "JMP": { params: 1, types: ["AD"] },            // Unconditional jump
+
     "RTS": { params: 0 },                           // Return from subroutine
     "RTI": { params: 0 },                           // Return from interrupt
     "BRA": { params: 2, types: ["COND", "O"] },     // Branch with condition
@@ -75,18 +83,32 @@ const parseOperand = (operand, type, labels) => {
 };
 
 
-
-
 // Parse a single line of ASM code
 const parseLine = (line, lineNumber, labels) => {
     const parts = line.split(' ');
     const op = parts[0].toUpperCase();
 
-    if (!instructionSet[op]) {
+    let instruction = instructionSet[op];
+    
+    // Check if instructionSet[op] is an array
+    if (Array.isArray(instruction)) {
+        // Find the matching instruction from the array
+        instruction = instruction.find(instr => {
+            // Define your matching criteria. For example:
+            return instr.params === parts.length - 1;
+        });
+
+        if (!instruction) {
+            throw new Error(`No matching instruction for "${op}" on line ${lineNumber}.`);
+        }
+    }
+
+    // If instruction is still undefined, it means it's not in the instruction set
+    if (!instruction) {
         throw new Error(`Unknown instruction "${op}" on line ${lineNumber}.`);
     }
 
-    const { params, types } = instructionSet[op];
+    const { params, types } = instruction;
     if (parts.length - 1 !== params) {
         throw new Error(`"${op}" expects ${params} operands but got ${parts.length - 1}.`);
     }
@@ -97,6 +119,7 @@ const parseLine = (line, lineNumber, labels) => {
 
     return { op, args: operands };
 };
+
 
 // Main function to assemble the program
 function assemble(input) {

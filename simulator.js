@@ -72,213 +72,207 @@ addMemoryButton.addEventListener('click', () => {
 
 
 const instructions = {
-    "LDL": (rd, address) => {
-        // Ensure the address is within the memory range
-        if (address < MEMORY_START || address >= MEMORY_SIZE) {
-            throw new Error(`Invalid memory address: 0x${address.toString(16).toUpperCase()}`);
+    // 1. Data Movement Instructions
+    "LDL": (rd, val) => {
+        if (val < 0 || val > 0xFFFF) {
+            throw new Error(`Invalid constant value: 0x${val.toString(16).toUpperCase()}`);
         }
-
-        // Load the content at the memory address into the register
-        registers[rd] = memory[address] & HEX_MASK;
-
-        // Set the zero flag if the value loaded is zero
+        registers[rd] = val & HEX_MASK;
         zeroFlag = (registers[rd] === 0) ? 1 : 0;
-
-        // Update flags display
         updateFlagsDisplay();
-
-        console.log(`LDL: Loaded 0x${memory[address].toString(16).toUpperCase()} from memory address 0x${address.toString(16).toUpperCase()} into R${rd}`);
+        console.log(`LDL: Loaded constant 0x${val.toString(16).toUpperCase()} into R${rd}`);
     },
-
     "LDH": (rd, val) => { registers[rd] = ((val << 8) | (registers[rd] & 0x00FF)) & HEX_MASK; },
-    "ADD": (rd, rs, rt) => {
-        const result = registers[rs] + registers[rt];
-        carryFlag = (result > 0xFFFF) ? 1 : 0;
-        registers[rd] = result & 0xFFFF;
-
-        zeroFlag = (registers[rd] === 0) ? 1 : 0;
-
-        // Update the display for carry and zero flags
-        updateFlagsDisplay();
-
-        console.log(`ADD: 0x${registers[rs].toString(16).toUpperCase()} + 0x${registers[rt].toString(16).toUpperCase()} = 0x${registers[rd].toString(16).toUpperCase()}`);
-    },
-
-
-    "SUB": (rd, rs, rt) => {
-        const result = registers[rs] - registers[rt];
-        carryFlag = (result < 0) ? 1 : 0;  // Handle carry (borrow)
-        registers[rd] = (result & 0xFFFF);
-
-        zeroFlag = (registers[rd] === 0) ? 1 : 0;  // Set zero flag if result is zero
-
-        // Update the display for carry and zero flags
-        updateFlagsDisplay();
-
-        console.log(`SUB: 0x${registers[rs].toString(16).toUpperCase()} - 0x${registers[rt].toString(16).toUpperCase()} = 0x${registers[rd].toString(16).toUpperCase()}`);
-    },
-
-
-    "MUL": (rd, rs, rt) => {
-        const result = registers[rs] * registers[rt];
-
-        // Set carry flag if the result exceeds 16 bits (overflow)
-        carryFlag = (result > 0xFFFF) ? 1 : 0;
-
-        registers[rd] = result & 0xFFFF;  // Ensure result fits within 16-bit register
-
-        // Set zero flag if the result is zero
-        zeroFlag = (registers[rd] === 0) ? 1 : 0;
-
-        // Update the display for carry and zero flags
-        updateFlagsDisplay();
-
-        console.log(`MUL: 0x${registers[rs].toString(16).toUpperCase()} * 0x${registers[rt].toString(16).toUpperCase()} = 0x${registers[rd].toString(16).toUpperCase()}`);
-    },
-
-    "DIV": (rd, rs, rt) => {
-        if (registers[rt] === 0) {
-            throw new Error("Division by zero error!");
-        }
-
-        const result = Math.floor(registers[rs] / registers[rt]);
-        const remainder = registers[rs] % registers[rt];
-
-        // Set carry flag if there's a remainder (non-zero)
-        carryFlag = (remainder !== 0) ? 1 : 0;
-
-        registers[rd] = result & 0xFFFF;  // Ensure result fits within 16-bit register
-
-        // Set zero flag if the quotient is zero
-        zeroFlag = (registers[rd] === 0) ? 1 : 0;
-
-        // Update the display for carry and zero flags
-        updateFlagsDisplay();
-
-        console.log(`DIV: 0x${registers[rs].toString(16).toUpperCase()} / 0x${registers[rt].toString(16).toUpperCase()} = 0x${registers[rd].toString(16).toUpperCase()}`);
-    },
-
-
-    "CMP": (rs, rt) => {
-        const result = registers[rs] - registers[rt];
-
-        // Set carry flag if there is no borrow (result >= 0)
-        carryFlag = (result >= 0) ? 0 : 1;  // If result is negative, set carry flag
-
-        // Set zero flag if result is zero (i.e., registers are equal)
-        zeroFlag = (result === 0) ? 1 : 0;
-
-        // Update the display for carry and zero flags
-        updateFlagsDisplay();
-
-        console.log(`CMP: 0x${registers[rs].toString(16).toUpperCase()} - 0x${registers[rt].toString(16).toUpperCase()} = 0x${result.toString(16).toUpperCase()}`);
-    },
-
-
-
-    "ADC": (rd, rs, rt) => { registers[rd] = (registers[rs] + registers[rt] + (registers[rd] & 1)) & HEX_MASK; },
-    "SBB": (rd, rs, rt) => { registers[rd] = (registers[rs] - registers[rt] - (registers[rd] & 1)) & HEX_MASK; },
-    "NOT": (rd) => { registers[rd] = ~registers[rd] & HEX_MASK; },
-    "SWP": (rd, rs) => { [registers[rd], registers[rs]] = [registers[rs], registers[rd]]; },
-    "XOR": (rd, rs, rt) => { registers[rd] = (registers[rs] ^ registers[rt]) & HEX_MASK; },
-    "OR": (rd, rs, rt) => { registers[rd] = (registers[rs] | registers[rt]) & HEX_MASK; },
-    "AND": (rd, rs, rt) => { registers[rd] = (registers[rs] & registers[rt]) & HEX_MASK; },
-    "MKB": (rd, rs, mask) => { registers[rd] = (registers[rs] & mask) & HEX_MASK; },
-    "INB": (rd, rs, mask) => { registers[rd] = (registers[rs] ^ mask) & HEX_MASK; },
-    "SEB": (rd, rs, mask) => { registers[rd] = (registers[rs] | mask) & HEX_MASK; },
-    "CLB": (rd, rs, mask) => { registers[rd] = (registers[rs] & ~mask) & HEX_MASK; },
-
-    // SHL instruction (Shift Left)
-    "SHL": (rd) => {
-        const carryOut = (registers[rd] & 0x8000) >> 15;  // Capture the leftmost bit (Carry)
-        registers[rd] = (registers[rd] << 1) & HEX_MASK;  // Perform the left shift
-        carryFlag = carryOut;  // Set the Carry Flag
-        zeroFlag = (registers[rd] === 0) ? 1 : 0;  // Set Zero Flag if result is zero
-        updateFlagsDisplay();  // Update the flags display
-    },
-
-    // SHR instruction (Shift Right)
-    "SHR": (rd) => {
-        const carryOut = registers[rd] & 0x1;  // Capture the rightmost bit (Carry)
-        registers[rd] = (registers[rd] >> 1) & HEX_MASK;  // Perform the right shift
-        carryFlag = carryOut;  // Set the Carry Flag
-        zeroFlag = (registers[rd] === 0) ? 1 : 0;  // Set Zero Flag if result is zero
-        updateFlagsDisplay();  // Update the flags display
-    },
-
-    // ROL instruction (Rotate Left)
-    "ROL": (rd) => {
-        const carryOut = (registers[rd] & 0x8000) >> 15;  // Capture the leftmost bit (Carry)
-        registers[rd] = ((registers[rd] << 1) | (registers[rd] >> 15)) & HEX_MASK;  // Rotate left
-        carryFlag = carryOut;  // Set the Carry Flag
-        zeroFlag = (registers[rd] === 0) ? 1 : 0;  // Set Zero Flag if result is zero
-        updateFlagsDisplay();  // Update the flags display
-    },
-
-    // ROR instruction (Rotate Right)
-    "ROR": (rd) => {
-        const carryOut = registers[rd] & 0x1;  // Capture the rightmost bit (Carry)
-        registers[rd] = ((registers[rd] >> 1) | (registers[rd] << 15)) & HEX_MASK;  // Rotate right
-        carryFlag = carryOut;  // Set the Carry Flag
-        zeroFlag = (registers[rd] === 0) ? 1 : 0;  // Set Zero Flag if result is zero
-        updateFlagsDisplay();  // Update the flags display
-    },
-
-    // LDD instruction (Load from Memory)
     "LDD": (rd, address) => {
-        registers[rd] = memory[address] & HEX_MASK; // Ensure we mask the value to fit 16-bit
-        zeroFlag = (registers[rd] === 0) ? 1 : 0; // Set the zero flag if the value is 0
-        updateFlagsDisplay(); // Update the flags display
+        registers[rd] = memory[address] & HEX_MASK;
+        zeroFlag = (registers[rd] === 0) ? 1 : 0;
+        updateFlagsDisplay();
         console.log(`LDD: Loaded 0x${memory[address].toString(16).toUpperCase()} into R${rd}`);
     },
-
-    // Assuming the instruction is in the format STO <memory_address>, <register>
     "STO": (address, rd) => {
-        // Store the value from the register (rd) into the specified memory address (address)
-        memory[address] = registers[rd] & HEX_MASK; // Store the 16-bit value from the register
+        memory[address] = registers[rd] & HEX_MASK;
         console.log(`STO: Stored value 0x${registers[rd].toString(16).toUpperCase()} from R${rd} into memory address 0x${address.toString(16).toUpperCase()}`);
         updateMemoryDisplay();
     },
-
-    "OUT": (address, rs) => { console.log(`Output at 0x${address.toString(16)}: 0x${registers[rs].toString(16).toUpperCase()}`); },
-    "IN": (rd, address) => { registers[rd] = memory[address] & HEX_MASK; },
-
-
     "PSH": (rd) => {
         if (stackPointer <= REAR) {
             alert("Stack Overflow!");
             return;
         }
-        // Push the value from register (rd) onto the stack at the current FRONT position
         stack.push({
-            address: stackPointer,  // The current stack pointer address (FRONT)
-            contents: registers[rd] & HEX_MASK  // The value to push onto the stack from register (rd)
+            address: stackPointer,
+            contents: registers[rd] & HEX_MASK
         });
-        stackPointer--;  // Decrement the stack pointer to move downward toward REAR
+        stackPointer--;
         alert(`PSH: Pushed value 0x${registers[rd].toString(16).toUpperCase()} from R${rd} onto the stack at address 0x${stackPointer.toString(16).toUpperCase()}`);
         updateStackDisplay();
     },
-
-    // Pop (POP) instruction handler
     "POP": (rd) => {
         if (stackPointer >= FRONT) {
             alert("Stack Underflow!");
             return;
         }
-        stackPointer++;  // Increment the stack pointer to move upward toward FRONT
+        stackPointer++;
         const poppedItem = stack.pop();
-        registers[rd] = poppedItem.contents & HEX_MASK;  // Load contents into register (rd)
+        registers[rd] = poppedItem.contents & HEX_MASK;
         alert(`POP: Popped value 0x${registers[rd].toString(16).toUpperCase()} into R${rd} from address 0x${poppedItem.address.toString(16).toUpperCase()}`);
         updateStackDisplay();
     },
 
+    // 2. Arithmetic Instructions
+    "ADD": (rd, rs, rt) => {
+        const result = registers[rs] + registers[rt];
+        carryFlag = (result > 0xFFFF) ? 1 : 0;
+        registers[rd] = result & 0xFFFF;
+        zeroFlag = (registers[rd] === 0) ? 1 : 0;
+        updateFlagsDisplay();
+        console.log(`ADD: 0x${registers[rs].toString(16).toUpperCase()} + 0x${registers[rt].toString(16).toUpperCase()} = 0x${registers[rd].toString(16).toUpperCase()}`);
+    },
+    "SUB": (rd, rs, rt) => {
+        const result = registers[rs] - registers[rt];
+        carryFlag = (result < 0) ? 1 : 0;
+        registers[rd] = (result & 0xFFFF);
+        zeroFlag = (registers[rd] === 0) ? 1 : 0;
+        updateFlagsDisplay();
+        console.log(`SUB: 0x${registers[rs].toString(16).toUpperCase()} - 0x${registers[rt].toString(16).toUpperCase()} = 0x${registers[rd].toString(16).toUpperCase()}`);
+    },
+    "MUL": (rd, rs, rt) => {
+        const result = registers[rs] * registers[rt];
+        carryFlag = (result > 0xFFFF) ? 1 : 0;
+        registers[rd] = result & 0xFFFF;
+        zeroFlag = (registers[rd] === 0) ? 1 : 0;
+        updateFlagsDisplay();
+        console.log(`MUL: 0x${registers[rs].toString(16).toUpperCase()} * 0x${registers[rt].toString(16).toUpperCase()} = 0x${registers[rd].toString(16).toUpperCase()}`);
+    },
+    "DIV": (rd, rs, rt) => {
+        if (registers[rt] === 0) {
+            throw new Error("Division by zero error!");
+        }
+        const result = Math.floor(registers[rs] / registers[rt]);
+        const remainder = registers[rs] % registers[rt];
+        carryFlag = (remainder !== 0) ? 1 : 0;
+        registers[rd] = result & 0xFFFF;
+        zeroFlag = (registers[rd] === 0) ? 1 : 0;
+        updateFlagsDisplay();
+        console.log(`DIV: 0x${registers[rs].toString(16).toUpperCase()} / 0x${registers[rt].toString(16).toUpperCase()} = 0x${registers[rd].toString(16).toUpperCase()}`);
+    },
 
-    "JS": (address) => { memory[--stackPointer] = instructionPointer & HEX_MASK; instructionPointer = address; },
-    "JNZ": (rd, address) => {
-        if (registers[rd] !== 0) {
+    // 3. Logical Instructions
+    "XOR": (rd, rs, rt) => { registers[rd] = (registers[rs] ^ registers[rt]) & HEX_MASK; },
+    "OR": (rd, rs, rt) => { registers[rd] = (registers[rs] | registers[rt]) & HEX_MASK; },
+    "AND": (rd, rs, rt) => { registers[rd] = (registers[rs] & registers[rt]) & HEX_MASK; },
+    "NOT": (rd, rs) => { registers[rd] = ~registers[rs] & HEX_MASK; },
+
+    // 4. Bit Manipulation Instructions
+
+    "SHL": (rd) => {
+        const carryOut = (registers[rd] & 0x8000) >> 15; // Extract the carry-out bit (MSB)
+        registers[rd] = (registers[rd] << 1) & HEX_MASK; // Perform a single left shift and mask to fit the register size
+        carryFlag = carryOut; // Update the carry flag
+        zeroFlag = (registers[rd] === 0) ? 1 : 0; // Update the zero flag
+        updateFlagsDisplay(); // Refresh the flags display
+    },
+
+    "SHLC": (rd, rs) => {
+        const shifts = registers[rs] & 0xFFFF; // Extract the number of shifts from the register
+        let carryOut = 0;
+
+        for (let i = 0; i < shifts; i++) {
+            carryOut = (registers[rd] & 0x8000) >> 15; // Extract the carry-out bit (MSB)
+            registers[rd] = (registers[rd] << 1) & HEX_MASK; // Perform a left shift and mask to fit the register size
+        }
+
+        carryFlag = carryOut; // Update the carry flag based on the last shift
+        zeroFlag = (registers[rd] === 0) ? 1 : 0; // Update the zero flag
+        updateFlagsDisplay(); // Refresh the flags display
+    },
+
+    "SHR": (rd) => {
+        const carryOut = registers[rd] & 0x1; // Extract the carry-out bit (LSB)
+        registers[rd] = (registers[rd] >> 1) & HEX_MASK; // Perform a single right shift and mask
+        carryFlag = carryOut; // Update the carry flag
+        zeroFlag = (registers[rd] === 0) ? 1 : 0; // Update the zero flag
+        updateFlagsDisplay(); // Refresh the flags display
+    },
+    "SHRC": (rd, rs) => {
+        let shifts = registers[rs] & 0xFFFF; // Extract the number of shifts from the register
+        shifts = Math.min(shifts, 16); // Limit shifts to the register width
+
+        let carryOut = 0;
+
+        for (let i = 0; i < shifts; i++) {
+            carryOut = registers[rd] & 0x1; // Extract the carry-out bit (LSB)
+            registers[rd] = (registers[rd] >> 1) & HEX_MASK; // Perform a right shift and mask
+        }
+
+        carryFlag = carryOut; // Update the carry flag based on the last shift
+        zeroFlag = (registers[rd] === 0) ? 1 : 0; // Update the zero flag
+        updateFlagsDisplay(); // Refresh the flags display
+    },
+
+    "ROL": (rd) => {
+        const carryOut = (registers[rd] & 0x8000) >> 15; // Extract the carry-out bit (MSB)
+        registers[rd] = ((registers[rd] << 1) | (registers[rd] >> 15)) & HEX_MASK; // Perform a rotate left
+        carryFlag = carryOut; // Update the carry flag
+        zeroFlag = (registers[rd] === 0) ? 1 : 0; // Update the zero flag
+        updateFlagsDisplay(); // Refresh the flags display
+    },
+
+    "ROLC": (rd, rs) => {
+        const shifts = registers[rs] & 0xFFFF; // Extract the number of shifts from the register
+        let carryOut = 0;
+
+        for (let i = 0; i < shifts; i++) {
+            carryOut = (registers[rd] & 0x8000) >> 15; // Extract the carry-out bit (MSB)
+            registers[rd] = ((registers[rd] << 1) | (registers[rd] >> 15)) & HEX_MASK; // Perform a rotate left
+        }
+
+        carryFlag = carryOut; // Update the carry flag based on the last rotation
+        zeroFlag = (registers[rd] === 0) ? 1 : 0; // Update the zero flag
+        updateFlagsDisplay(); // Refresh the flags display
+    },
+
+    "ROR": (rd) => {
+        const carryOut = registers[rd] & 0x1; // Extract the carry-out bit (LSB)
+        registers[rd] = ((registers[rd] >> 1) | (registers[rd] << 15)) & HEX_MASK; // Perform a rotate right
+        carryFlag = carryOut; // Update the carry flag
+        zeroFlag = (registers[rd] === 0) ? 1 : 0; // Update the zero flag
+        updateFlagsDisplay(); // Refresh the flags display
+    },
+
+    "RORC": (rd, rs) => {
+        const shifts = registers[rs] & 0xFFFF; // Extract the number of shifts from the register
+        let carryOut = 0;
+
+        for (let i = 0; i < shifts; i++) {
+            carryOut = registers[rd] & 0x1; // Extract the carry-out bit (LSB)
+            registers[rd] = ((registers[rd] >> 1) | (registers[rd] << 15)) & HEX_MASK; // Perform a rotate right
+        }
+
+        carryFlag = carryOut; // Update the carry flag based on the last rotation
+        zeroFlag = (registers[rd] === 0) ? 1 : 0; // Update the zero flag
+        updateFlagsDisplay(); // Refresh the flags display
+    },
+
+
+
+    // 5. Control Flow Instructions
+    "CMP": (rs, rt) => {
+        const result = registers[rs] - registers[rt];
+        carryFlag = (result >= 0) ? 0 : 1;
+        zeroFlag = (result === 0) ? 1 : 0;
+        updateFlagsDisplay();
+        console.log(`CMP: 0x${registers[rs].toString(16).toUpperCase()} - 0x${registers[rt].toString(16).toUpperCase()} = 0x${result.toString(16).toUpperCase()}`);
+    },
+    "JNZ": (address) => {
+        if (zeroFlag === 0) {
             instructionPointer = address;
+            console.log(`JNZ: Jumped to address 0x${address.toString(16).toUpperCase()} because zeroFlag is 0.`);
+        } else {
+            console.log(`JNZ: No jump, zeroFlag is 1.`);
         }
     },
+    "JS": (address) => { memory[--stackPointer] = instructionPointer & HEX_MASK; instructionPointer = address; },
     "RTS": () => {
         if (stackPointer >= STACK_END) {
             alert("Stack Underflow!");
@@ -286,16 +280,22 @@ const instructions = {
         }
         instructionPointer = memory[++stackPointer] & HEX_MASK;
     },
+    "RTI": () => { instructionPointer = memory[++stackPointer] & HEX_MASK; },
+    "BRA": (cond, offset) => { if (evaluateCondition(cond)) instructionPointer = (instructionPointer + offset) & HEX_MASK; },
     "HLT": () => {
         console.log("Halting the program");
-        // You can add any necessary termination logic here, if needed.
     },
 
-    "RTI": () => { instructionPointer = memory[++stackPointer] & HEX_MASK; },
-    "BRA": (cond, offset) => { if (evaluateCondition(cond)) instructionPointer = (instructionPointer + offset) & HEX_MASK; }
-
-
+    // 6. Input/Output Instructions
+    "OUT": (address, rs) => { console.log(`Output at 0x${address.toString(16)}: 0x${registers[rs].toString(16).toUpperCase()}`); },
+    "IN": (rd, address) => { registers[rd] = memory[address] & HEX_MASK; }
 };
+
+
+
+
+
+
 
 // Stack and memory display functions
 function updateStackDisplay() {
