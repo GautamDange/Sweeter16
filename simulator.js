@@ -16,6 +16,7 @@ const registers = new Uint16Array(8); // 8 registers (R0 to R7)
 let instructionPointer = 0x0000; // Program Counter (IP) starts at 0x0000
 let carryFlag = 0; // Carry flag (0: no carry, 1: carry)
 let zeroFlag = 0;  // Zero flag (0: no zero result, 1: zero result)
+let halted = false; // Add a global variable to track program state
 const HEX_MASK = 0xFFFF; // Mask to ensure 16-bit values
 
 // UI elements for dynamic memory content input and updating
@@ -272,6 +273,14 @@ const instructions = {
             console.log(`JNZ: No jump, zeroFlag is 1.`);
         }
     },
+    "JZ": (address) => {
+        if (zeroFlag === 1) {
+            instructionPointer = address;
+            console.log(`JZ: Jumped to address 0x${address.toString(16).toUpperCase()} because zeroFlag is 1.`);
+        } else {
+            console.log(`JZ: No jump, zeroFlag is 0.`);
+        }
+    },
     "JS": (address) => { memory[--stackPointer] = instructionPointer & HEX_MASK; instructionPointer = address; },
     "RTS": () => {
         if (stackPointer >= STACK_END) {
@@ -284,6 +293,7 @@ const instructions = {
     "BRA": (cond, offset) => { if (evaluateCondition(cond)) instructionPointer = (instructionPointer + offset) & HEX_MASK; },
     "HLT": () => {
         console.log("Halting the program");
+        halted = true; // Set the halted state to true
     },
 
     // 6. Input/Output Instructions
@@ -442,6 +452,13 @@ function updateControlPanel() {
 
 // Execute the next instruction in the program
 function executeNext() {
+
+    if (halted) {
+        console.log("Program is halted. No further execution.");
+        alert("Program has halted.");
+        return; // Prevent further execution
+    }
+
     if (instructionPointer >= program.length) {
         alert("End of Program");
         return;
