@@ -316,8 +316,9 @@ function updateStackDisplay() {
         const contents = stack[i].contents;
         stackContent += `Address: 0x${address.toString(16).toUpperCase()}, Contents: 0x${contents.toString(16).toUpperCase()}\n`;
     }
-    stackDisplay.value = stackContent.trim();
+    stackDisplay.innerText = stackContent.trim(); // Use innerText to update content of a div
 }
+
 
 
 
