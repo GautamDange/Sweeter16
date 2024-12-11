@@ -20,7 +20,6 @@
         <img src="fias_logo.png" alt="FIAS Logo" width="200">
     </div>
 
-
     <div id="row_2_col_1">
         <textarea id="InputASM"
             placeholder=" Paste your ASM program here (use hexadecimal, e.g., #0x6, #0x5 for constants)... "></textarea>
@@ -48,19 +47,18 @@
 
     <div id="row_3_col_2">
         <button id="RUN_NEXT" class="primary-btn">Run Next</button>
-       
     </div>
 
     <div id="row_3_col_3">
-    <div id="sub_left">
-        <textarea id="dynamicMemoryContentsForUser" 
-        placeholder="(0x0005: 20)  will add content 20 at memory address 0005H">
-        </textarea>
-        <button id="addMemoryContent" class="primary-btn">Add Memory Content</button>
-    </div>
+        <div id="sub_left">
+            <textarea id="dynamicMemoryContentsForUser" 
+            placeholder="(0x0005: 20)  will add content 20 at memory address 0005H">
+            </textarea>
+            <button id="addMemoryContent" class="primary-btn">Add Memory Content</button>
+        </div>
         <div id="sub_right">
             <h2>Control Panel</h2>
-            <p>Instruction Pointer (IP): <span id="ipDisplay">0x0000</span></p>
+            <p>Instruction Pointer (IP): <span id="ipDisplay">0x1000</span></p>
             <p>Stack Pointer (SP): <span id="spDisplay">0xFFFF</span></p>
             <p>Carry Flag (CF): <span id="carryFlagDisplay">0</span></p>
             <p>Zero Flag (ZF): <span id="zeroFlagDisplay">0</span></p>
@@ -68,22 +66,15 @@
     </div>
 
     <div id="row_4_col_1">
-        <textarea id="reserved_LOW">readonly placeholder="Reserved for future use.."</textarea>
+        <div id="reserved_LOW" class="textarea-like">Reserved for future use..</div>
     </div>
     <div id="row_4_col_2">
-        <textarea id="stackDisplay" readonly placeholder="Stack contents..."></textarea>
+        <div id="stackDisplay" class="textarea-like">Stack contents...</div>
     </div>
     <div id="row_4_col_3">
-        <textarea id="dynamicmemorydisplay" readonly placeholder="dynamice memory contents..."></textarea>
+        <div id="dynamicmemorydisplay" class="textarea-like">Dynamic memory contents...</div>
     </div>
-  
-
-
-
-
-
-
-
+    <script src="script.js"></script>
     <script src="assembler.js"></script>
     <script src="simulator.js"></script>
     <script>
@@ -97,8 +88,6 @@
 
             try {
                 const assembledProgram = assemble(inputASM); // Convert ASM to JSON
-
-
                 // Load the assembled program into the simulator
                 loadProgram(assembledProgram);
             } catch (error) {

@@ -243,7 +243,36 @@ button:active {
 
 }
 
+.textarea-like {
+    display: block;
+    width: 90%;
+    height: 150px; /* Adjust height */
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    background-color: #ffffff;
+    overflow: auto;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
 
+/* Highlight Flash Effect */
+.highlight-flash {
+    animation: flash 1s ease-out;
+}
+
+@keyframes flash {
+    0% {
+        background-color: #ffeb3b; /* Highlight color (e.g., yellow) */
+    }
+    50% {
+        background-color: #fff; /* Return to normal color */
+    }
+    100% {
+        background-color: transparent;
+    }
+}
 
 /* Responsive Design */
 @media (max-width: 768px) {
