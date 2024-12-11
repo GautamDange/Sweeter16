@@ -442,8 +442,9 @@ function updateDynamicMemoryDisplay() {
     }
 
     // Update the dynamic memory display with the formatted content
-    dynamicMemoryDisplay.value = dynamicMemoryContent.trim();
+    dynamicMemoryDisplay.innerText = dynamicMemoryContent.trim(); // Use innerText to update the div content
 }
+
 
 // Display control panel values (IP, SP)
 function updateControlPanel() {
