@@ -25,44 +25,50 @@
             placeholder=" Paste your ASM program here (use hexadecimal, e.g., #0x6, #0x5 for constants)... "></textarea>
     </div>
     <div id="row_2_col_2">
-        <button id="Convert" class="primary-btn">Convert</button>
+        <div id="convertControl">
+            <button id="Convert" class="primary-btn">Convert</button>
+        </div>
+
+        <div id="textareaControl">
+            <textarea id="dynamicMemoryContentsForUser"
+                placeholder="(8:10) will add content 10 at memory address 0008H"></textarea>
+        </div>
+        
+
+        <div id="addMemoryControl">
+            <button id="addMemoryContent" class="primary-btn">Add Memory Content</button>
+        </div>
     </div>
+
     <div id="row_2_col_3">
         <textarea id="InMemoryProgram" readonly placeholder="Memory-mapped ASM program..."></textarea>
     </div>
 
     <div id="row_3_col_1">
         <h2>Registers</h2>
-        <div id="registerDisplay">
-            <div class="register">R0: 0</div>
-            <div class="register">R1: 0</div>
-            <div class="register">R2: 0</div>
-            <div class="register">R3: 0</div>
-            <div class="register">R4: 0</div>
-            <div class="register">R5: 0</div>
-            <div class="register">R6: 0</div>
-            <div class="register">R7: 0</div>
-        </div>
+        <ul class="register-display">
+            <li class="register-item">R0: 0</li>
+            <li class="register-item">R1: 0</li>
+            <li class="register-item">R2: 0</li>
+            <li class="register-item">R3: 0</li>
+            <li class="register-item">R4: 0</li>
+            <li class="register-item">R5: 0</li>
+            <li class="register-item">R6: 0</li>
+            <li class="register-item">R7: 0</li>
+        </ul>
     </div>
+
 
     <div id="row_3_col_2">
         <button id="RUN_NEXT" class="primary-btn">Run Next</button>
     </div>
 
     <div id="row_3_col_3">
-        <div id="sub_left">
-            <textarea id="dynamicMemoryContentsForUser" 
-            placeholder="(0x0005: 20)  will add content 20 at memory address 0005H">
-            </textarea>
-            <button id="addMemoryContent" class="primary-btn">Add Memory Content</button>
-        </div>
-        <div id="sub_right">
-            <h2>Control Panel</h2>
-            <p>Instruction Pointer (IP): <span id="ipDisplay">0x1000</span></p>
-            <p>Stack Pointer (SP): <span id="spDisplay">0xFFFF</span></p>
-            <p>Carry Flag (CF): <span id="carryFlagDisplay">0</span></p>
-            <p>Zero Flag (ZF): <span id="zeroFlagDisplay">0</span></p>
-        </div>
+        <h2>Control Panel</h2>
+        <p>Instruction Pointer (IP): <span id="ipDisplay">0x1000</span></p>
+        <p>Stack Pointer (SP): <span id="spDisplay">0xFFFF</span></p>
+        <p>Carry Flag (CF): <span id="carryFlagDisplay">0</span></p>
+        <p>Zero Flag (ZF): <span id="zeroFlagDisplay">0</span></p>
     </div>
 
     <div id="row_4_col_1">

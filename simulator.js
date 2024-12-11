@@ -356,25 +356,25 @@ function loadProgram(assembledProgram) {
 
 
 // Display register values
+// Display register values
 function updateRegisterDisplay() {
-    const registerDisplay = document.getElementById('registerDisplay');
+    const registerDisplay = document.querySelector('.register-display'); // Target the updated class
     registerDisplay.innerHTML = ''; // Clear existing content
 
     registers.forEach((value, index) => {
-        const registerElement = document.createElement('span');
+        const registerElement = document.createElement('li'); // Use <li> for each register
+        registerElement.classList.add('register-item'); // Add the class for styling
+
         registerElement.innerHTML = `
             R${index}: 
             <span style="font-size: larger; color: blue;">0x${value.toString(16).toUpperCase()}</span> 
             (<span style="font-size: smaller; color: red;">${value}</span>)
         `;
-        registerDisplay.appendChild(registerElement);
 
-        // Add a line break after every 4 registers for better readability
-        if ((index + 1) % 4 === 0) {
-            registerDisplay.appendChild(document.createElement('br'));
-        }
+        registerDisplay.appendChild(registerElement);
     });
 }
+
 
 
 // Display memory contents, highlighting IP and SP
