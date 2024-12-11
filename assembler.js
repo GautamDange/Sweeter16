@@ -3,8 +3,8 @@
 const instructionSet = {
     "ADD": { params: 3, types: ["R", "R", "R"] },   // Add two registers into a destination register
     "SUB": { params: 3, types: ["R", "R", "R"] },   // Subtract two registers into a destination register
-    "DIV": { "params": 3, "types": ["R", "R", "R"] },//  Division
-    "MUL": { "params": 3, "types": ["R", "R", "R"] }, // Multiplication
+    "DIV": { params: 3, types: ["R", "R", "R"] },//  Division
+    "MUL": { params: 3, types: ["R", "R", "R"] }, // Multiplication
     "ADC": { params: 3, types: ["R", "R", "R"] },   // Add with carry
     "SBB": { params: 3, types: ["R", "R", "R"] },   // Subtract with borrow
     "NOT": { params: 2, types: ["R", "R"] },        // Logical NOT
@@ -29,7 +29,8 @@ const instructionSet = {
 
     "LDL": { params: 2, types: ["R", "C"] },        // Load a constant into a register
     "LDH": { params: 2, types: ["R", "C"] },        // Load high byte of a constant into a register
-    "LDD": { params: 2, types: ["R", "MR"] },       // Load from memory (by register) into a register
+    "LDD": { params: 2, types: ["R", "MR"] },       // Load from memory  into a register
+    "LDR": { params: 2, types: ["R", "R"] },       // Load from memory (by register) into a register
     "STO": { params: 2, types: ["MR", "R"] },
 
     "OUT": { params: 2, types: ["MR", "R"] },       // Output register value to memory (I/O)
