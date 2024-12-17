@@ -72,8 +72,21 @@
     </div>
 
     <div id="row_4_col_1">
-        <div id="reserved_LOW" class="textarea-like">Reserved for future use..</div>
+        <div id="reserved_LOW" class="SampleHolder">
+            <!-- Tab Buttons -->
+            <div id="tabButtons">
+                <button id="tabPrograms" class="tab-btn active">Sample Programs</button>
+                <button id="tabInstructions" class="tab-btn">Instruction Set</button>
+            </div>
+    
+            <!-- Content Display Area -->
+            <div id="tabContent" style="margin-top: 10px; overflow-y: auto; height: 300px; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9;">
+                Select a tab to view content here.
+            </div>
+        </div>
     </div>
+
+    
     <div id="row_4_col_2">
         <div id="stackDisplay" class="textarea-like">Stack contents...</div>
     </div>
@@ -83,28 +96,7 @@
     <script src="script.js"></script>
     <script src="assembler.js"></script>
     <script src="simulator.js"></script>
-    <script>
-        // Link Convert button to assembler.js
-        document.getElementById('Convert').addEventListener('click', () => {
-            const inputASM = document.getElementById('InputASM').value;
-            if (!inputASM.trim()) {
-                alert("Please provide an ASM program to convert.");
-                return;
-            }
-
-            try {
-                const assembledProgram = assemble(inputASM); // Convert ASM to JSON
-                // Load the assembled program into the simulator
-                loadProgram(assembledProgram);
-            } catch (error) {
-                alert(`Error during assembly: ${error.message}`);
-            }
-        });
-
-        // Link RUN_NEXT button to simulator.js
-        document.getElementById('RUN_NEXT').addEventListener('click', () => {
-            executeNext(); // Assuming executeNext() is a global function from simulator.js
-        });
+ 
     </script>
 </body>
 

@@ -1,6 +1,7 @@
-// script.js
+const tabPrograms = document.getElementById('tabPrograms');
+const tabInstructions = document.getElementById('tabInstructions');
+const tabContent = document.getElementById('tabContent');
 
-// Function to flash a UI element
 function flashElement(elementId) {
     const element = document.getElementById(elementId);
     if (element) {
@@ -11,12 +12,9 @@ function flashElement(elementId) {
     }
 }
 
-// Example Usage:
-// When updating stack display
 document.getElementById('stackDisplay').innerText = 'Updated stack contents...';
 flashElement('stackDisplay');
 
-// Link Convert button to assembler.js
 document.getElementById('Convert').addEventListener('click', () => {
     const inputASM = document.getElementById('InputASM').value;
     if (!inputASM.trim()) {
@@ -33,33 +31,49 @@ document.getElementById('Convert').addEventListener('click', () => {
     }
 });
 
-// Link RUN_NEXT button to simulator.js
+
 document.getElementById('RUN_NEXT').addEventListener('click', () => {
-    executeNext(); // Assuming executeNext() is a global function from simulator.js
+    executeNext(); 
 });
 
-// Event listener for Sample Programs
-document.getElementById('loadSamplePrograms').addEventListener('click', () => {
+
+function loadSamplePrograms() {
     import('./Sample_program.js').then(module => {
-        const contentDisplay = document.getElementById('contentDisplay');
-        contentDisplay.innerHTML = module.default.map(program => `
+        tabContent.innerHTML = module.default.map(program => `
             <h3>${program.name}</h3>
             <pre><code>${program.code.trim()}</code></pre>
             <hr>
         `).join('');
+    }).catch(err => {
+        tabContent.innerHTML = `<p>Error loading sample programs: ${err.message}</p>`;
     });
-});
+}
 
-// Event listener for Instruction Set
-document.getElementById('loadInstructionSet').addEventListener('click', () => {
+function loadInstructionSet() {
     import('./Sample_instructions.js').then(module => {
-        const contentDisplay = document.getElementById('contentDisplay');
-        contentDisplay.innerHTML = module.default.map(instruction => `
+        tabContent.innerHTML = module.default.map(instruction => `
             <h3>${instruction.name}</h3>
             <p><strong>Syntax:</strong> <code>${instruction.syntax}</code></p>
             <p><strong>Description:</strong> ${instruction.description}</p>
             <pre><code>${instruction.example}</code></pre>
             <hr>
         `).join('');
+    }).catch(err => {
+        tabContent.innerHTML = `<p>Error loading instruction set: ${err.message}</p>`;
     });
+}
+
+// Add event listeners to tabs
+tabPrograms.addEventListener('click', () => {
+    tabPrograms.classList.add('active');
+    tabInstructions.classList.remove('active');
+    loadSamplePrograms();
 });
+
+tabInstructions.addEventListener('click', () => {
+    tabInstructions.classList.add('active');
+    tabPrograms.classList.remove('active');
+    loadInstructionSet();
+});
+
+loadSamplePrograms();

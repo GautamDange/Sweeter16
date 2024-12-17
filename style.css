@@ -179,7 +179,6 @@ button:active {
     text-align: center;
     font-size: 1.2rem;
     color: #495057;
-    border: 2px dashed #adb5bd;
     border-radius: 10px;
     padding: 10px;
     margin: 10px auto;
@@ -212,61 +211,72 @@ button:active {
     color: #495057;
 }
 
-/* Registers */
+
+
+/* Registers Section */
 #registers {
-    text-align: center;
     font-family: Arial, sans-serif;
-    margin: 20px;
+    margin: 20px auto;
+    max-width: 800px; /* Center content and limit width */
+    background-color: #f8f9fa; /* Light grey background */
+    border: 2px solid #e0e0e0; /* Subtle border */
+    border-radius: 10px; /* Rounded corners */
+    padding: 20px; /* Add spacing around the container */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
 }
 
 #registers h2 {
-    font-size: 1.5rem;
-    margin-bottom: 10px;
-    color: #333;
+    font-size: 1.8rem; /* Larger heading */
+    margin-bottom: 15px; /* Add space below heading */
+    color: #007BFF; /* Blue color for the heading */
+    text-align: center;
 }
 
-#dynamicMemoryContentsForUser
-{
-    width: 90%;
-    height: 90%;
-}
-
+/* Register Display */
 .register-display {
-    display: flex;
-    flex-wrap: wrap;
-    list-style-type: none; /* Removes bullets from the list */
-    padding: 10; /* Removes default padding from the list */
-    margin: 0; /* Removes default margin */
-    gap: 10px; /* Optional: Adds spacing between items */
-    max-width: 90%; /* Adjust based on the desired width */
+    display: grid; /* Use grid layout */
+    grid-template-columns: repeat(4, 1fr); /* 4 registers per row */
+    gap: 15px; /* Space between items */
+    list-style: none; /* Remove bullet points */
+    padding: 0; /* Remove default padding */
+    margin: 0; /* Remove default margin */
 }
 
+/* Register Item */
 .register-item {
-    flex: 1 1 20%; /* Each item takes up 25% of the row */
-    text-align: center; /* Centers the text within each register */
-    padding: 10px; /* Optional: Adds padding for better readability */
-    border: 1px solid #ccc; /* Optional: Adds a border for better visibility */
-    box-sizing: border-box; /* Ensures padding doesn't affect width */
-}
-
-
-.register {
-    padding: 10px 10px;
-    background-color: #f9f9f9; /* Light background for contrast */
-    border: 2px solid #ddd; /* Border for definition */
-    border-radius: 8px; /* Rounded corners for modern look */
-    font-size: 1rem;
+    background-color: #ffffff; /* White background for each register */
+    border: 1px solid #ddd; /* Subtle border */
+    border-radius: 8px; /* Rounded corners */
+    text-align: center;
+    padding: 10px 15px; /* Add internal spacing */
+    font-size: 1rem; /* Font size */
     font-weight: bold;
-    color: #444; /* Text color */
-    transition: transform 0.2s, background-color 0.2s; /* Hover effects */
+    color: #444; /* Dark text for contrast */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Light shadow */
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.register:hover {
-    transform: scale(1.05); /* Slight zoom on hover */
-    background-color: #e0e0e0; /* Subtle hover color */
-    cursor: pointer;
+/* Hover Effect */
+.register-item:hover {
+    transform: translateY(-3px); /* Slight lift */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* More prominent shadow */
+    background-color: #e9f5ff; /* Light blue background */
+    color: #007BFF; /* Blue text on hover */
 }
 
+
+
+.SampleHolder {
+    display: block;
+    text-align: left; /* Left-align content */
+    padding: 10px; /* Spacing around content */
+    background-color: #f8f9f9; /* Light grey background for consistency */
+    border-radius: 8px; /* Smooth rounded corners */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    overflow: visible; /* No scrolling */
+    height: auto; /* Automatically adjust to content */
+    margin: 0; /* No additional margin */
+}
 
 /* Stack Display */
 #stackDisplay {
@@ -304,7 +314,6 @@ button:active {
     text-align: center;
     font-size: 1.2rem;
     color: #495057;
-    border: 2px dashed #adb5bd;
     border-radius: 10px;
     margin:  auto;
     background-color: #ffffff;
@@ -359,4 +368,59 @@ button:active {
     button {
         width: 50%;
     }
+}
+
+/* Tab Buttons Container */
+#tabButtons {
+    display: flex;
+    border-bottom: 2px solid #ccc; /* Bottom border for tab container */
+    margin-bottom: 10px; /* Space between tabs and content */
+}
+
+/* Tab Buttons */
+.tab-btn {
+    flex: 1; /* Distribute space equally */
+    padding: 10px;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #007BFF; /* Default tab text color */
+    background-color: #f1f1f1; /* Default background */
+    border: 1px solid #ccc;
+    border-bottom: none; /* Remove bottom border to integrate with content area */
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* Hover Effect */
+.tab-btn:hover {
+    background-color: #e9ecef;
+}
+
+/* Active Tab */
+.tab-btn.active {
+    background-color: #ffffff; /* Active tab background */
+    color: #007BFF; /* Active tab text color */
+    font-weight: bold;
+    border-top: 2px solid #007BFF; /* Highlight active tab */
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+    border-bottom: none;
+    cursor: default; /* Remove pointer on active tab */
+}
+
+/* Content Display Area */
+#tabContent {
+    text-align: left; /* Left-align text */
+    padding: 10px;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 0 0 8px 8px; /* Rounded corners at the bottom */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    height: 300px;
+    overflow-y: auto; /* Add scrolling for large content */
+    font-size: 12px; /* Adjust the font size as needed */
+    line-height: 1.5; /* Improve readability with spacing */
+    font-family: 'Courier New', monospace; /* Ensures a clean code-like appearance */
+    color: #212529; /* Dark text for better contrast */
 }

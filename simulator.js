@@ -1,17 +1,17 @@
-// Memory size and layout setup
+//MEMORY - ASM PROGRAM - IP 
 const MEMORY_SIZE = 0xE000; // Program memory size up to 0xDFFFF
 const MEMORY_START = 0x0000; // Memory starts at 0x0000
 const MEMORY_END = 0x2FFF; // Memory ends at 0x2FFF
 const memory = new Uint16Array(MEMORY_SIZE); // Adjusted memory size
 
-// Corrected Stack size and range definitions
+//STACK
 const FRONT = 0xFFFF;  // The top of the stack (FRONT of the stack) where values are pushed
 const REAR = 0xDEEE;   // The bottom of the stack (REAR of the stack) where values are popped
 const STACK_SIZE = FRONT - REAR + 1;  // The number of addresses in the stack
 let stack = [];
 let stackPointer = FRONT;  // Stack pointer starts at FRONT (top of the stack)
 
-// Register and control variables
+//REGISTERS
 const registers = new Uint16Array(8); // 8 registers (R0 to R7)
 let instructionPointer = 0x0000; // Program Counter (IP) starts at 0x0000
 let carryFlag = 0; // Carry flag (0: no carry, 1: carry)
@@ -19,54 +19,30 @@ let zeroFlag = 0;  // Zero flag (0: no zero result, 1: zero result)
 let halted = false; // Add a global variable to track program state
 const HEX_MASK = 0xFFFF; // Mask to ensure 16-bit values
 
-// UI elements for dynamic memory content input and updating
+//UI
 const memoryInput = document.getElementById('dynamicMemoryContentsForUser');
 const addMemoryButton = document.getElementById('addMemoryContent');
 
 // Event listener for the Add Memory Content button
 addMemoryButton.addEventListener('click', () => {
     const inputValue = memoryInput.value.trim();
-
-    // Ensure the input is not empty
     if (!inputValue) {
         alert("Please provide a memory address and content.");
         return;
     }
-
-    // Split the input into memory address and content
     const [address, content] = inputValue.split(':').map(str => str.trim());
-
-    // Validate the input format (address and content should be in hexadecimal)
     if (!address.match(/^[0-9A-Fa-f]+$/)) {
         alert("Invalid memory address format. Please use hexadecimal format for address (e.g., 0x0000).");
         return;
     }
-
-    // Check if content is in hexadecimal format
     if (!content.match(/^[0-9A-Fa-f]+$/)) {
         alert("Invalid content format. Please enter the content in hexadecimal format (e.g., 0xA for hexadecimal).");
         return;
     }
-
-    // Convert address to hexadecimal
     const memoryAddress = parseInt(address, 16); // Convert address to hex
-
-    // Convert content to hexadecimal
     let memoryContent = parseInt(content, 16); // Treat content as hexadecimal value
-
-    // Ensure the address is within valid memory range
-    if (memoryAddress < 0 || memoryAddress >= MEMORY_SIZE) {
-        alert(`Invalid memory address. Please enter a value between 0 and ${MEMORY_SIZE - 1}.`);
-        return;
-    }
-
-    // Store the content at the specified memory address
     memory[memoryAddress] = memoryContent;
-
-    // Update the dynamic memory display to reflect the change
     updateDynamicMemoryDisplay();
-
-    // Optionally show an alert to confirm the memory update
     alert(`Memory at address 0x${memoryAddress.toString(16).toUpperCase()} updated to 0x${memoryContent.toString(16).toUpperCase()} (decimal: ${memoryContent})`);
 });
 
@@ -167,12 +143,26 @@ const instructions = {
     // 4. Bit Manipulation Instructions
 
     "SHL": (rd) => {
-        const carryOut = (registers[rd] & 0x8000) >> 15; // Extract the carry-out bit (MSB)
-        registers[rd] = (registers[rd] << 1) & HEX_MASK; // Perform a single left shift and mask to fit the register size
+        // Ensure the register value is treated as a hexadecimal number
+        const value = parseInt(registers[rd], 16);
+
+        if (isNaN(value)) {
+            throw new Error(`Invalid register value: ${registers[rd]}. Expected hexadecimal.`);
+        }
+
+        // Perform bitwise operations
+        const carryOut = (value & 0x8000) >> 15; // Extract the carry-out bit (MSB)
+        registers[rd] = (value << 1) & HEX_MASK; // Perform a single left shift and mask to fit the register size
+
+        // Update flags
         carryFlag = carryOut; // Update the carry flag
         zeroFlag = (registers[rd] === 0) ? 1 : 0; // Update the zero flag
-        updateFlagsDisplay(); // Refresh the flags display
+
+        // Refresh the flags display
+        updateFlagsDisplay();
+        updateRegisterDisplay();
     },
+
 
     "SHLC": (rd, rs) => {
         const shifts = registers[rs] & 0xFFFF; // Extract the number of shifts from the register
@@ -501,9 +491,9 @@ function initialize() {
 
     // Convert the default program to ASM text
     const asmText = `
-LDL R0, #0x5
-LDL R1, #0xA
-ADD R2, R0, R1`.trim(); // Use hexadecimal constants for consistency with the program.
+        LDL R0, #0x5
+        LDL R1, #0xA
+        ADD R2, R0, R1`.trim(); // Use hexadecimal constants for consistency with the program.
 
     // Populate the InputASM textarea
     const inputAsmTextarea = document.getElementById('InputASM');
