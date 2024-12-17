@@ -12,6 +12,20 @@ function flashElement(elementId) {
     }
 }
 
+function flashTopStackElement() {
+    const stackDisplay = document.getElementById('stackDisplay');
+    if (stackDisplay && stackDisplay.lastElementChild) {
+        const topElement = stackDisplay.lastElementChild;
+
+        // Force restart the animation
+        topElement.classList.remove('stack-highlight-flash');
+        void topElement.offsetWidth; // Trigger reflow to restart the animation
+        topElement.classList.add('stack-highlight-flash');
+    }
+}
+
+
+
 document.getElementById('stackDisplay').innerText = 'Updated stack contents...';
 flashElement('stackDisplay');
 

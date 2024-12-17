@@ -1,3 +1,5 @@
+const userMemoryMap = {}; // To keep track of updated addresses and their values
+
 //MEMORY - ASM PROGRAM - IP 
 const MEMORY_SIZE = 0xE000; // Program memory size up to 0xDFFFF
 const MEMORY_START = 0x0000; // Memory starts at 0x0000
@@ -11,6 +13,12 @@ const STACK_SIZE = FRONT - REAR + 1;  // The number of addresses in the stack
 let stack = [];
 let stackPointer = FRONT;  // Stack pointer starts at FRONT (top of the stack)
 
+// USER MEMORY
+const USR_MEMORY_SIZE = 0x1000; // User dynamic memory size
+const USR_MEMORY_START = 0x0000; // User memory starts at 0x0000
+const USR_MEMORY_END = 0x1000; // User memory ends at 0x1000
+const UserMemory = new Uint16Array(USR_MEMORY_SIZE);
+
 //REGISTERS
 const registers = new Uint16Array(8); // 8 registers (R0 to R7)
 let instructionPointer = 0x0000; // Program Counter (IP) starts at 0x0000
@@ -23,7 +31,9 @@ const HEX_MASK = 0xFFFF; // Mask to ensure 16-bit values
 const memoryInput = document.getElementById('dynamicMemoryContentsForUser');
 const addMemoryButton = document.getElementById('addMemoryContent');
 
-// Event listener for the Add Memory Content button
+
+
+
 addMemoryButton.addEventListener('click', () => {
     const inputValue = memoryInput.value.trim();
     if (!inputValue) {
@@ -31,20 +41,91 @@ addMemoryButton.addEventListener('click', () => {
         return;
     }
     const [address, content] = inputValue.split(':').map(str => str.trim());
-    if (!address.match(/^[0-9A-Fa-f]+$/)) {
-        alert("Invalid memory address format. Please use hexadecimal format for address (e.g., 0x0000).");
+    if (!address.match(/^[0-9A-Fa-f]+$/) || !content.match(/^[0-9A-Fa-f]+$/)) {
+        alert("Invalid input format. Use hexadecimal (e.g., 0x0000:0xA).");
         return;
     }
-    if (!content.match(/^[0-9A-Fa-f]+$/)) {
-        alert("Invalid content format. Please enter the content in hexadecimal format (e.g., 0xA for hexadecimal).");
+
+    const memoryAddress = parseInt(address, 16);
+    let memoryContent = parseInt(content, 16);
+
+    if (memoryAddress < USR_MEMORY_START || memoryAddress >= USR_MEMORY_END) {
+        alert(`Invalid user memory address. Valid range: 0x${USR_MEMORY_START.toString(16)} - 0x${USR_MEMORY_END.toString(16)}`);
         return;
     }
-    const memoryAddress = parseInt(address, 16); // Convert address to hex
-    let memoryContent = parseInt(content, 16); // Treat content as hexadecimal value
-    memory[memoryAddress] = memoryContent;
-    updateDynamicMemoryDisplay();
-    alert(`Memory at address 0x${memoryAddress.toString(16).toUpperCase()} updated to 0x${memoryContent.toString(16).toUpperCase()} (decimal: ${memoryContent})`);
+
+    UserMemory[memoryAddress] = memoryContent; // Update UserMemory
+    updateUserMemoryDisplay(memoryAddress); // Update only this address in the display
+
+    alert(`User Memory at address 0x${memoryAddress.toString(16).toUpperCase()} updated to 0x${memoryContent.toString(16).toUpperCase()} (decimal: ${memoryContent})`);
 });
+
+
+function updateUserMemoryDisplay(updatedAddress) {
+    const dynamicMemoryDisplay = document.getElementById('dynamicmemorydisplay');
+    if (!dynamicMemoryDisplay) {
+        console.error("Error: dynamicmemorydisplay element not found!");
+        return;
+    }
+
+    // Fetch the value of the updated address
+    const value = UserMemory[updatedAddress] || 0x0000;
+    const hexAddress = updatedAddress.toString(16).padStart(4, '0').toUpperCase();
+    const hexValue = `0x${value.toString(16).toUpperCase()}`;
+
+    // Check if the memory entry already exists
+    let existingElement = document.getElementById(`userMemory-${hexAddress}`);
+
+    if (existingElement) {
+        // If the entry exists, just update the content
+        existingElement.innerHTML = `0x${hexAddress}: ${hexValue} (${value})`;
+    } else {
+        // If the entry does not exist, append a new one
+        const newEntry = document.createElement('div');
+        newEntry.id = `userMemory-${hexAddress}`;
+        newEntry.className = 'user-memory-item';
+        newEntry.innerHTML = `0x${hexAddress}: ${hexValue} (${value})`;
+        dynamicMemoryDisplay.appendChild(newEntry);
+    }
+
+    // Flash the last updated memory entry
+    flashElement(`userMemory-${hexAddress}`);
+}
+
+
+function updateUserMemoryDisplayy(updatedAddress) {
+    const dynamicMemoryDisplay = document.getElementById('dynamicmemorydisplay');
+
+    if (!dynamicMemoryDisplay) {
+        console.error("Error: dynamicmemorydisplay element not found!");
+        return;
+    }
+
+    // Check if the updated address is already in the memory map
+    const value = UserMemory[updatedAddress] || 0x0000; // Fetch updated value
+    const hexAddress = updatedAddress.toString(16).padStart(4, '0').toUpperCase();
+    const hexValue = `0x${value.toString(16).toUpperCase()}`;
+    const decimalValue = value;
+
+    // Update the memory map
+    userMemoryMap[updatedAddress] = value;
+
+    // Rebuild the display content with line breaks
+    let updatedContent = '';
+    Object.keys(userMemoryMap)
+        .sort((a, b) => a - b) // Sort addresses in ascending order
+        .forEach(address => {
+            const val = userMemoryMap[address];
+            updatedContent += `0x${parseInt(address).toString(16).padStart(4, '0').toUpperCase()}: 0x${val.toString(16).toUpperCase()} (${val})\n`;
+        });
+
+    // Update the dynamic memory display using innerText to preserve newlines
+    dynamicMemoryDisplay.innerText = updatedContent.trim();
+}
+
+
+
+
 
 
 
@@ -59,17 +140,49 @@ const instructions = {
         updateFlagsDisplay();
         console.log(`LDL: Loaded constant 0x${val.toString(16).toUpperCase()} into R${rd}`);
     },
+
     "LDH": (rd, val) => { registers[rd] = ((val << 8) | (registers[rd] & 0x00FF)) & HEX_MASK; },
     "LDD": (rd, address) => {
-        registers[rd] = memory[address] & HEX_MASK;
+        if (address < USR_MEMORY_START || address >= USR_MEMORY_END) {
+            throw new Error(`Invalid user memory address: 0x${address.toString(16).toUpperCase()}`);
+        }
+        registers[rd] = UserMemory[address] & HEX_MASK;
         zeroFlag = (registers[rd] === 0) ? 1 : 0;
         updateFlagsDisplay();
-        console.log(`LDD: Loaded 0x${memory[address].toString(16).toUpperCase()} into R${rd}`);
+        updateRegisterDisplay();
+        console.log(`LDD: Loaded 0x${UserMemory[address].toString(16).toUpperCase()} into R${rd}`);
     },
-    "STO": (address, rd) => {
-        memory[address] = registers[rd] & HEX_MASK;
-        console.log(`STO: Stored value 0x${registers[rd].toString(16).toUpperCase()} from R${rd} into memory address 0x${address.toString(16).toUpperCase()}`);
-        updateMemoryDisplay();
+
+    "LDR": (rd, rs) => {
+        const address = registers[rs];
+        if (address < USR_MEMORY_START || address >= USR_MEMORY_END) {
+            throw new Error(`Invalid user memory address: 0x${address.toString(16).toUpperCase()}`);
+        }
+        registers[rd] = UserMemory[address] & HEX_MASK;
+        zeroFlag = (registers[rd] === 0) ? 1 : 0;
+        updateFlagsDisplay();
+        updateRegisterDisplay();
+        console.log(`LDR: Loaded 0x${UserMemory[address].toString(16).toUpperCase()} into R${rd}`);
+    },
+    "STO": (rs, address) => {
+        if (address < USR_MEMORY_START || address >= USR_MEMORY_END) {
+            throw new Error(`Invalid memory address: 0x${address.toString(16).toUpperCase()}`);
+        }
+        UserMemory[address] = registers[rs] & HEX_MASK; // Store value from register into address
+        console.log(`STO: Stored value 0x${registers[rs].toString(16).toUpperCase()} from R${rs} into address 0x${address.toString(16).toUpperCase()}`);
+        updateUserMemoryDisplay(address); // Highlight updated memory
+    },
+
+
+    // STR: Store value from a register into the memory address specified by another register
+    "STR": (rs, rd) => {
+        const address = registers[rd]; // Use value in rd as the address
+        if (address < USR_MEMORY_START || address >= USR_MEMORY_END) {
+            throw new Error(`Invalid memory address: 0x${address.toString(16).toUpperCase()}`);
+        }
+        UserMemory[address] = registers[rs] & HEX_MASK; // Store value with masking
+        console.log(`STR: Stored value 0x${registers[rs].toString(16).toUpperCase()} from R${rs} into address pointed by R${rd} (0x${address.toString(16).toUpperCase()})`);
+        updateUserMemoryDisplay(address); // Update display for the updated address
     },
     "PSH": (rd) => {
         if (stackPointer <= REAR) {
@@ -114,13 +227,27 @@ const instructions = {
         console.log(`SUB: 0x${registers[rs].toString(16).toUpperCase()} - 0x${registers[rt].toString(16).toUpperCase()} = 0x${registers[rd].toString(16).toUpperCase()}`);
     },
     "MUL": (rd, rs, rt) => {
-        const result = registers[rs] * registers[rt];
-        carryFlag = (result > 0xFFFF) ? 1 : 0;
-        registers[rd] = result & 0xFFFF;
+        const result = registers[rs] * registers[rt]; // Perform multiplication
+
+        // Mask to ensure only the lower 16 bits are stored
+        registers[rd] = result & HEX_MASK;
+
+        // Optional: Log the upper and lower 16 bits for clarity
+        const upperBits = (result >> 16) & HEX_MASK; // Extract upper 16 bits
+        const lowerBits = result & HEX_MASK;         // Extract lower 16 bits
+
+        console.log(`MUL: ${registers[rs]} (R${rs}) * ${registers[rt]} (R${rt}) = 0x${result.toString(16).toUpperCase()}`);
+        console.log(`MUL: Lower 16 bits: 0x${lowerBits.toString(16).toUpperCase()}, Upper 16 bits: 0x${upperBits.toString(16).toUpperCase()}`);
+
+        // Update zero and carry flags
+        carryFlag = (upperBits > 0) ? 1 : 0; // Carry flag if the result exceeds 16 bits
         zeroFlag = (registers[rd] === 0) ? 1 : 0;
+
         updateFlagsDisplay();
-        console.log(`MUL: 0x${registers[rs].toString(16).toUpperCase()} * 0x${registers[rt].toString(16).toUpperCase()} = 0x${registers[rd].toString(16).toUpperCase()}`);
+        updateRegisterDisplay();
     },
+
+
     "DIV": (rd, rs, rt) => {
         if (registers[rt] === 0) {
             throw new Error("Division by zero error!");
@@ -292,24 +419,45 @@ const instructions = {
 };
 
 
-
-
-
-
-
-// Stack and memory display functions
 function updateStackDisplay() {
     const stackDisplay = document.getElementById('stackDisplay');
-    let stackContent = '';
+
+    // Remove old top flash highlight
+    const oldTopElement = stackDisplay.querySelector('.stack-highlight-flash');
+    if (oldTopElement) oldTopElement.classList.remove('stack-highlight-flash');
+
+    // Clear stack display and update only visible content
+    stackDisplay.innerHTML = ''; // Reset
+
     for (let i = stack.length - 1; i >= 0; i--) {
         const address = stack[i].address;
         const contents = stack[i].contents;
-        stackContent += `Address: 0x${address.toString(16).toUpperCase()}, Contents: 0x${contents.toString(16).toUpperCase()}\n`;
+        const decimalValue = contents; // Already numeric
+
+        const newStackElement = document.createElement('div');
+        newStackElement.id = `stack-item-${i}`;
+        newStackElement.textContent = `0x${address.toString(16).toUpperCase()}: 0x${contents.toString(16).toUpperCase()} (${decimalValue})`;
+
+        // Add flash highlight ONLY to the topmost element
+        if (i === stack.length - 1) {
+            newStackElement.classList.add('stack-highlight-flash');
+        }
+
+        stackDisplay.appendChild(newStackElement);
     }
-    stackDisplay.innerText = stackContent.trim(); // Use innerText to update content of a div
 }
 
+function flashTopStackElement() {
+    const stackDisplay = document.getElementById('stackDisplay');
+    if (stackDisplay && stackDisplay.lastElementChild) {
+        const topElement = stackDisplay.lastElementChild;
 
+        // Force restart the animation
+        topElement.classList.remove('stack-highlight-flash');
+        void topElement.offsetWidth; // Trigger reflow to restart the animation
+        topElement.classList.add('stack-highlight-flash');
+    }
+}
 
 
 function updateFlagsDisplay() {
@@ -339,29 +487,41 @@ function loadProgram(assembledProgram) {
 
     // Display program in ASM view
     const programDisplay = document.getElementById('InMemoryProgram');
-    programDisplay.value = program.map((inst, index) =>
-        `${index.toString(16).padStart(4, '0')}: ${inst.op} ${inst.args.join(', ')}`
-    ).join('\n');
+    programDisplay.value = program.map((inst, index) => {
+        const formattedArgs = inst.args.map(arg => {
+            if (typeof arg === 'number') {
+                const hexValue = `0x${arg.toString(16).toUpperCase()}`; // Convert to hexadecimal
+                const decimalValue = `(${arg})`; // Decimal representation
+                return `${hexValue} ${decimalValue}`; // Combine both
+            }
+            return arg; // Leave non-numeric arguments unchanged
+        }).join(', ');
+
+        return `${index.toString(16).padStart(4, '0').toUpperCase()}: ${inst.op} ${formattedArgs}`;
+    }).join('\n');
 }
 
 
 // Display register values
-// Display register values
 function updateRegisterDisplay() {
-    const registerDisplay = document.querySelector('.register-display'); // Target the updated class
-    registerDisplay.innerHTML = ''; // Clear existing content
+    const registerDisplay = document.querySelector('.register-display');
 
     registers.forEach((value, index) => {
-        const registerElement = document.createElement('li'); // Use <li> for each register
-        registerElement.classList.add('register-item'); // Add the class for styling
+        const registerElement = document.getElementById(`register-R${index}`);
+        const previousValue = registerElement.dataset.value || "0"; // Track previous value using data attribute
 
+        // Update register display content
         registerElement.innerHTML = `
             R${index}: 
             <span style="font-size: larger; color: blue;">0x${value.toString(16).toUpperCase()}</span> 
             (<span style="font-size: smaller; color: red;">${value}</span>)
         `;
 
-        registerDisplay.appendChild(registerElement);
+        // If the value has changed, trigger the flash effect
+        if (previousValue !== value.toString()) {
+            flashElement(`register-R${index}`);
+            registerElement.dataset.value = value.toString(); // Update the stored value
+        }
     });
 }
 
@@ -413,36 +573,52 @@ function updateMemoryDisplay() {
 }
 
 
-function updateDynamicMemoryDisplay() {
-    const dynamicMemoryDisplay = document.getElementById('dynamicmemorydisplay');
-    let dynamicMemoryContent = '';
+// Previous values to detect changes
+let previousIP = null;
+let previousSP = null;
+let previousCF = null;
+let previousZF = null;
 
-    // Show a selected range of memory addresses and their content
-    const rangeToShow = 16; // Show the first 16 memory locations (you can adjust this if needed)
-    for (let i = 0; i < rangeToShow; i++) {
-        const address = i.toString(16).padStart(4, '0').toUpperCase(); // Hexadecimal address
-        const value = memory[i] || 0x0000; // Default to 0x0000 if no value is set
-        const hexValue = `0x${value.toString(16).toUpperCase()}`; // Hexadecimal value
+function updateControlPanel() {
+    const ipElement = document.getElementById('ipDisplay');
+    const spElement = document.getElementById('spDisplay');
+    const cfElement = document.getElementById('carryFlagDisplay');
+    const zfElement = document.getElementById('zeroFlagDisplay');
 
-        // To show decimal value: parse the value directly (as it's in hex internally)
-        const decimalValue = parseInt(value.toString(16), 16); // Convert from hex to decimal for display
-
-        // Format the line for each address and content
-        dynamicMemoryContent += `0x${address}: ${hexValue} (${decimalValue})\n`; // Show both hex and decimal
+    // Update IP and flash if changed
+    const newIP = `0x${instructionPointer.toString(16).padStart(4, '0').toUpperCase()}`;
+    if (previousIP !== newIP) {
+        ipElement.textContent = newIP;
+        flashElement('ipDisplay');
+        previousIP = newIP; // Update previous value
     }
 
-    // Update the dynamic memory display with the formatted content
-    dynamicMemoryDisplay.innerText = dynamicMemoryContent.trim(); // Use innerText to update the div content
+    // Update SP and flash if changed
+    const newSP = `0x${stackPointer.toString(16).padStart(4, '0').toUpperCase()}`;
+    if (previousSP !== newSP) {
+        spElement.textContent = newSP;
+        flashElement('spDisplay');
+        previousSP = newSP;
+    }
+
+    // Update CF and flash if changed
+    const newCF = carryFlag === 1 ? '1' : '0';
+    if (previousCF !== newCF) {
+        cfElement.textContent = newCF;
+        flashElement('carryFlagDisplay');
+        previousCF = newCF;
+    }
+
+    // Update ZF and flash if changed
+    const newZF = zeroFlag === 1 ? '1' : '0';
+    if (previousZF !== newZF) {
+        zfElement.textContent = newZF;
+        flashElement('zeroFlagDisplay');
+        previousZF = newZF;
+    }
 }
 
 
-// Display control panel values (IP, SP)
-function updateControlPanel() {
-    document.getElementById('ipDisplay').textContent = `0x${instructionPointer.toString(16).padStart(4, '0').toUpperCase()}`;
-    document.getElementById('spDisplay').textContent = `0x${stackPointer.toString(16).padStart(4, '0').toUpperCase()}`;
-}
-
-// Execute the next instruction in the program
 function executeNext() {
 
     if (halted) {
@@ -461,7 +637,6 @@ function executeNext() {
         instructions[op](...args);
     }
 
-    // Highlight the instruction being executed in the InMemoryProgram textarea
     const memoryTextarea = document.getElementById('InMemoryProgram');
     const memoryLines = memoryTextarea.value.split('\n');
     const newMemoryContent = memoryLines.map((line, index) => {
@@ -473,38 +648,33 @@ function executeNext() {
 
     memoryTextarea.value = newMemoryContent;
 
-    // Update other displays
+
     updateRegisterDisplay();
     updateMemoryDisplay();
     updateControlPanel();
     updateStackDisplay();
 }
 
-
-// Initialize the simulator
 function initialize() {
     const defaultProgram = [
         { op: "LDL", args: [0, 5] }, // Load the value 5 into register R0
         { op: "LDL", args: [1, 10] }, // Load the value 10 into register R1
         { op: "ADD", args: [2, 0, 1] } // Add R0 and R1, store the result in R2
     ];
-
-    // Convert the default program to ASM text
     const asmText = `
-        LDL R0, #0x5
-        LDL R1, #0xA
-        ADD R2, R0, R1`.trim(); // Use hexadecimal constants for consistency with the program.
+LDL R0, #0x5
+LDL R1, #0xA
+ADD R2, R0, R1`.trim();
 
-    // Populate the InputASM textarea
     const inputAsmTextarea = document.getElementById('InputASM');
     inputAsmTextarea.value = asmText;
 
-    // Load the default program into the simulator
     loadProgram(defaultProgram);
     updateRegisterDisplay();
     updateMemoryDisplay();
     updateControlPanel();
     updateStackDisplay();
+    updateUserMemoryDisplay();
 }
 
 

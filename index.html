@@ -39,15 +39,16 @@
     <div id="row_3_col_1">
         <h2>Registers</h2>
         <ul class="register-display">
-            <li class="register-item">R0: 0</li>
-            <li class="register-item">R1: 0</li>
-            <li class="register-item">R2: 0</li>
-            <li class="register-item">R3: 0</li>
-            <li class="register-item">R4: 0</li>
-            <li class="register-item">R5: 0</li>
-            <li class="register-item">R6: 0</li>
-            <li class="register-item">R7: 0</li>
+            <li id="register-R0" class="register-item">R0: 0</li>
+            <li id="register-R1" class="register-item">R1: 0</li>
+            <li id="register-R2" class="register-item">R2: 0</li>
+            <li id="register-R3" class="register-item">R3: 0</li>
+            <li id="register-R4" class="register-item">R4: 0</li>
+            <li id="register-R5" class="register-item">R5: 0</li>
+            <li id="register-R6" class="register-item">R6: 0</li>
+            <li id="register-R7" class="register-item">R7: 0</li>
         </ul>
+        
     </div>
 
 
@@ -57,12 +58,28 @@
 
     <div id="row_3_col_3">
         <h2>Control Panel</h2>
-        <p>Instruction Pointer (IP): <span id="ipDisplay">0x1000</span></p>
-        <p>Stack Pointer (SP): <span id="spDisplay">0xFFFF</span></p>
-        <p>Carry Flag (CF): <span id="carryFlagDisplay">0</span></p>
-        <p>Zero Flag (ZF): <span id="zeroFlagDisplay">0</span></p>
+        <div class="control-grid">
+            <div class="control-item">
+                <span class="label">Instruction Pointer (IP):</span>
+                <span id="ipDisplay" class="value">0x1000</span>
+            </div>
+            <div class="control-item">
+                <span class="label">Stack Pointer (SP):</span>
+                <span id="spDisplay" class="value">0xFFFF</span>
+            </div>
+            <div class="control-item">
+                <span class="label">Carry Flag (CF):</span>
+                <span id="carryFlagDisplay" class="flag-value">0</span>
+            </div>
+            <div class="control-item">
+                <span class="label">Zero Flag (ZF):</span>
+                <span id="zeroFlagDisplay" class="flag-value">0</span>
+            </div>
+        </div>
     </div>
-
+    
+    
+    
     <div id="row_4_col_1">
         <div id="reserved_LOW" class="SampleHolder">
             <!-- Tab Buttons -->
@@ -78,30 +95,31 @@
         </div>
     </div>
     <div id="row_4_col_2">
-        <div id="stackDisplay" class="textarea-like">Stack contents...</div>
+        <h2 class="section-title" style="text-align: center;">Stack</h2>
+
+        <div id="stackDisplay" >Stack contents...</div>
     </div>
     <div id="row_4_col_3" style="display: flex; gap: 10px;">
-        <!-- First column: Dynamic Memory Display -->
-        <div id="dynamicmemorydisplayContainer" style="flex: 1;">
+        <div id="dynamicmemoryContainer" style="flex: 1; display: flex; flex-direction: column;">
+            <h2 class="section-title">User Memory</h2>
             <div id="dynamicmemorydisplay" class="textarea-like">
                 Dynamic memory contents...
             </div>
         </div>
     
-        <!-- Second column: Two rows -->
-        <div id="memoryControlsContainer" style="flex: 1; display: flex; flex-direction: column; gap: 10px;">
-            <!-- First row: Textarea -->
-            <div id="textareaControl">
+        <div id="memoryControlsContainer" style="flex: 1; display: flex; flex-direction: column;">
+            <h2 class="section-title" style="visibility: hidden;">Controls</h2>
+            <div id="textareaControl" style="flex: 1;">
                 <textarea id="dynamicMemoryContentsForUser"
                     placeholder="(8:10) will add content 10 at memory address 0008H"></textarea>
             </div>
-    
-            <!-- Second row: Button -->
-            <div id="addMemoryControl">
+            <div id="addMemoryControl" >
                 <button id="addMemoryContent" class="primary-btn">Add Memory Content</button>
             </div>
         </div>
     </div>
+    
+    
     
     <script src="script.js"></script>
     <script src="assembler.js"></script>

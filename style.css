@@ -41,50 +41,16 @@ body {
     box-sizing: border-box; /* Includes padding and borders in size calculations */
 }
 
-#row_3_col_3 {
-    width: 100%; /* Adjust width to fit the container */
-    margin: 10px auto; /* Center the panel with some spacing */
-    padding: 10px; /* Add internal spacing */
-    border: 2px solid #007BFF; /* Blue border for a polished look */
-    border-radius: 10px; /* Rounded corners */
-    background-color: #f8f9fa; /* Light grey background */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
-    text-align: left; /* Align text to the left */
-}
 
-#row_3_col_3 h2 {
-    font-size: 1.5em; /* Slightly larger heading */
-    color: #007BFF; /* Match the border color */
-    margin-bottom: 15px; /* Space below the heading */
-    text-align: center; /* Center-align the title */
-}
 
-#row_3_col_3 p {
-    font-size: 1em; /* Standard font size */
-    line-height: 1.6; /* Improve readability */
-    color: #333; /* Dark grey text */
-    margin: 8px 0; /* Space between paragraphs */
-}
 
-#row_3_col_3 span {
-    font-weight: bold; /* Highlight the values */
-    color: #007BFF; /* Make values stand out */
-}
 
 /* Universal Box Sizing */
 * {
     box-sizing: border-box;
 }
 
-#row_3_col_3 {
-    display: flex;
-    justify-content: space-between; /* Adds space between the two sections */
-    align-items: flex-start; /* Aligns items at the top */
-    gap: 10px; /* Optional: Adds spacing between the sections */
-    padding: 10px;
-    border: 1px solid #ccc; /* Optional: Adds a border around the container */
-    background-color: #f9f9f9; /* Optional: Background for the container */
-}
+
 
 #sub_left {
     flex: 1; /* Adjust size to share space equally */
@@ -156,7 +122,7 @@ button {
     cursor: pointer;
     transition: all 0.3s ease;
     background-color: #6c757d;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px #0000001a;
 }
 
 button.primary-btn {
@@ -187,28 +153,24 @@ button:active {
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* Control Panel */
-#control-panel {
-    text-align: center;
-    padding: 10px;
-    margin: 10px auto;
-    background-color: #f8f9fa;
-    border: 1px solid #ced4da;
-    border-radius: 10px;
-    max-width: 100%;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+
+#stackDisplay {
+    display: flex; 
+    flex-direction: column; 
+    gap: 5px; 
+    padding: 10px; 
+    border: 1px solid #ced4da; 
+    border-radius: 10px; 
+    background-color: #ffffff; 
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); 
+    overflow-y: auto; 
+    width: 90%; /* Takes 90% of the parent container's width */
+    margin: 0 auto; /* Centers it horizontally */
 }
 
-#control-panel h2 {
-    margin-bottom: 15px;
-    font-size: 1.4rem;
-    color: #007BFF;
-}
-
-#control-panel p {
-    font-size: 1rem;
-    margin: 8px 0;
-    color: #495057;
+#stackDisplay:focus-within {
+    border-color: #007BFF; 
+    box-shadow: 0 8px 16px rgba(0, 123, 255, 0.2); 
 }
 
 
@@ -249,7 +211,7 @@ button:active {
     border-radius: 8px; /* Rounded corners */
     text-align: center;
     padding: 10px 15px; /* Add internal spacing */
-    font-size: 1rem; /* Font size */
+    font-size: 14px; /* Font size */
     font-weight: bold;
     color: #444; /* Dark text for contrast */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Light shadow */
@@ -266,36 +228,7 @@ button:active {
 
 
 
-.SampleHolder {
-    display: block;
-    text-align: left; /* Left-align content */
-    padding: 10px; /* Spacing around content */
-    background-color: #f8f9f9; /* Light grey background for consistency */
-    border-radius: 8px; /* Smooth rounded corners */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-    overflow: visible; /* No scrolling */
-    height: auto; /* Automatically adjust to content */
-    margin: 0; /* No additional margin */
-}
 
-/* Stack Display */
-#stackDisplay {
-    width: 90%;
-    height: 90%;
-    padding: 10px;
-    margin: auto;
-    border: 1px solid #ced4da;
-    border-radius: 10px;
-    font-family: 'Courier New', monospace;
-    font-size: 1rem;
-    background: #ffffff;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-}
-
-#stackDisplay:focus-within {
-    border-color: #007BFF;
-    box-shadow: 0 8px 16px rgba(0, 123, 255, 0.2);
-}
 
 /* Utility Classes */
 .primary-btn {
@@ -308,18 +241,7 @@ button:active {
     background-color: #0056b3;
 }
 
-#reserved_LOW {
-    width: 100%;
-    height: 90%;
-    text-align: center;
-    font-size: 1.2rem;
-    color: #495057;
-    border-radius: 10px;
-    margin:  auto;
-    background-color: #ffffff;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 
-}
 
 .textarea-like {
     display: block;
@@ -335,40 +257,6 @@ button:active {
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* Highlight Flash Effect */
-.highlight-flash {
-    animation: flash 1s ease-out;
-}
-
-@keyframes flash {
-    0% {
-        background-color: #ffeb3b; /* Highlight color (e.g., yellow) */
-    }
-    50% {
-        background-color: #fff; /* Return to normal color */
-    }
-    100% {
-        background-color: transparent;
-    }
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    body {
-        grid-template-rows: auto auto auto auto;
-        grid-template-columns: 1fr;
-    }
-
-    textarea,
-    #registers,
-    #control-panel {
-        width: 50%;
-    }
-
-    button {
-        width: 50%;
-    }
-}
 
 /* Tab Buttons Container */
 #tabButtons {
@@ -424,15 +312,6 @@ button:active {
     font-family: 'Courier New', monospace; /* Ensures a clean code-like appearance */
     color: #212529; /* Dark text for better contrast */
 }
-#row_3_col_1 {
-    background-color: #f9f9f9; /* Light gray background to match Control Panel */
-    border: 2px solid #ddd; /* Subtle border for consistency */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add soft shadow */
-    padding: 16px; /* Add internal spacing */
-    border-radius: 8px; /* Rounded corners */
-    margin: 16px 0; /* Space above and below */
-    box-sizing: border-box; /* Ensures padding doesn’t affect layout */
-}
 
 #row_3_col_2 {
     display: flex; /* Enable Flexbox */
@@ -467,3 +346,82 @@ button:active {
     width: 100%; /* Full width of parent container */
 }
 
+
+.control-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Two columns for items */
+    gap: 12px; /* Space between items */
+    justify-content: center;
+}
+
+.control-item {
+    display: flex;
+    justify-content: space-between; /* Label and value alignment */
+    align-items: center;
+    background-color: #ffffff; /* White background */
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow */
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.control-item:hover {
+    transform: translateY(-3px); /* Hover lift effect */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.label {
+    font-weight: bold;
+    color: #495057; /* Dark grey */
+}
+
+.value, .flag-value {
+    font-family: 'Courier New', monospace;
+    font-size: 1.1rem;
+    color: #007BFF; /* Highlighted blue text */
+    font-weight: bold;
+}
+
+
+/* For Stack Top Highlight */
+
+/* For Stack Top Highlight */
+.stack-highlight-flash {
+    animation: flash-stack 3s ease-out;
+}
+
+@keyframes flash-stack {
+    0% {
+        background-color: #ff6347; /* Highlight color: Tomato red */
+    }
+    50% {
+        background-color: #ff9a85; /* Slightly faded red midway */
+    }
+    100% {
+        background-color: transparent; /* Reset to original state */
+    }
+}
+
+/* For User Memory Highlight */
+.highlight-flash {
+    animation: flash-user 5s ease-out;
+}
+
+@keyframes flash-user {
+    0% {
+        background-color: #ffeb3b; /* Yellow for user memory */
+    }
+    50% {
+        background-color: #fff59d; /* Slightly faded yellow */
+    }
+    100% {
+        background-color: transparent; /* Reset to original state */
+    }
+}
+
+/* Prevent propagation to children */
+.stack-highlight-flash *,
+.highlight-flash * {
+    animation: none !important;
+}
