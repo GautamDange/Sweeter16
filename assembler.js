@@ -31,7 +31,9 @@ const instructionSet = {
     "LDH": { params: 2, types: ["R", "C"] },        // Load high byte of a constant into a register
     "LDD": { params: 2, types: ["R", "MR"] },       // Load from memory  into a register
     "LDR": { params: 2, types: ["R", "R"] },       // Load from memory (by register) into a register
-    "STO": { params: 2, types: ["MR", "R"] },
+    "STO": { params: 2, types: ["R", "MR"] },
+    "STR": { params: 2, types: ["R", "R"] },
+
 
     "OUT": { params: 2, types: ["MR", "R"] },       // Output register value to memory (I/O)
     "IN": { params: 2, types: ["R", "MR"] },        // Input from memory (I/O) to a register
