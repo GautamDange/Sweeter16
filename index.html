@@ -14,7 +14,7 @@
         <img src="goetheuni.png" alt="FIAS Logo" width="200">
     </div>
     <div id="row_1_col_2" style="text-align: center;">
-        SWEETER16 ASM Simulator
+        <h2>SWEETER16 <BR> ASM Simulator</h2>
     </div>
     <div id="row_1_col_3" style="text-align: right;">
         <img src="fias_logo.png" alt="FIAS Logo" width="200">
@@ -29,15 +29,7 @@
             <button id="Convert" class="primary-btn">Convert</button>
         </div>
 
-        <div id="textareaControl">
-            <textarea id="dynamicMemoryContentsForUser"
-                placeholder="(8:10) will add content 10 at memory address 0008H"></textarea>
-        </div>
-        
-
-        <div id="addMemoryControl">
-            <button id="addMemoryContent" class="primary-btn">Add Memory Content</button>
-        </div>
+    
     </div>
 
     <div id="row_2_col_3">
@@ -85,14 +77,32 @@
             </div>
         </div>
     </div>
-
-    
     <div id="row_4_col_2">
         <div id="stackDisplay" class="textarea-like">Stack contents...</div>
     </div>
-    <div id="row_4_col_3">
-        <div id="dynamicmemorydisplay" class="textarea-like">Dynamic memory contents...</div>
+    <div id="row_4_col_3" style="display: flex; gap: 10px;">
+        <!-- First column: Dynamic Memory Display -->
+        <div id="dynamicmemorydisplayContainer" style="flex: 1;">
+            <div id="dynamicmemorydisplay" class="textarea-like">
+                Dynamic memory contents...
+            </div>
+        </div>
+    
+        <!-- Second column: Two rows -->
+        <div id="memoryControlsContainer" style="flex: 1; display: flex; flex-direction: column; gap: 10px;">
+            <!-- First row: Textarea -->
+            <div id="textareaControl">
+                <textarea id="dynamicMemoryContentsForUser"
+                    placeholder="(8:10) will add content 10 at memory address 0008H"></textarea>
+            </div>
+    
+            <!-- Second row: Button -->
+            <div id="addMemoryControl">
+                <button id="addMemoryContent" class="primary-btn">Add Memory Content</button>
+            </div>
+        </div>
     </div>
+    
     <script src="script.js"></script>
     <script src="assembler.js"></script>
     <script src="simulator.js"></script>
