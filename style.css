@@ -237,9 +237,9 @@ button:active {
     display: grid; /* Use grid layout */
     grid-template-columns: repeat(4, 1fr); /* 4 registers per row */
     gap: 15px; /* Space between items */
-    list-style: none; /* Remove bullet points */
-    padding: 0; /* Remove default padding */
-    margin: 0; /* Remove default margin */
+    list-style-type: none;
+    padding: 10px; /* Correct padding */
+    margin: 0 0 10px 0; /* Add bottom margin */
 }
 
 /* Register Item */
@@ -424,3 +424,46 @@ button:active {
     font-family: 'Courier New', monospace; /* Ensures a clean code-like appearance */
     color: #212529; /* Dark text for better contrast */
 }
+#row_3_col_1 {
+    background-color: #f9f9f9; /* Light gray background to match Control Panel */
+    border: 2px solid #ddd; /* Subtle border for consistency */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add soft shadow */
+    padding: 16px; /* Add internal spacing */
+    border-radius: 8px; /* Rounded corners */
+    margin: 16px 0; /* Space above and below */
+    box-sizing: border-box; /* Ensures padding doesn’t affect layout */
+}
+
+#row_3_col_2 {
+    display: flex; /* Enable Flexbox */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    height: 100%; /* Make sure it takes full height of its parent */
+}
+
+#row_4_col_3 {
+    display: flex;
+    gap: 10px; /* Space between the two columns */
+}
+
+#dynamicmemorydisplayContainer {
+    flex: 1; /* First column takes equal space */
+}
+
+#memoryControlsContainer {
+    flex: 1; /* Second column takes equal space */
+    display: flex;
+    flex-direction: column; /* Arrange children vertically */
+    gap: 10px; /* Space between textarea and button */
+}
+
+#dynamicMemoryContentsForUser {
+    width: 100%; /* Full width of parent container */
+    height: 100px; /* Fixed height for the textarea */
+    resize: none; /* Disable resizing */
+}
+
+#addMemoryControl button {
+    width: 100%; /* Full width of parent container */
+}
+
