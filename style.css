@@ -26,22 +26,6 @@ body {
     width: 100%;  /* Ensure the container takes up full width */
 }
 
-#row_2_col_2 > div {
-    width: 90%; /* Each child div takes 90% of the parent width */
-    height: 30%; /* Adjust height proportionately for each div */
-    display: flex;
-    align-items: center; /* Centers content vertically within each div */
-    justify-content: center; /* Centers content horizontally within each div */
-}
-
-#row_2_col_2 button, 
-#row_2_col_2 textarea {
-    width: 90%; /* Each control takes 90% of the parent div width */
-    height: 90%; /* Each control takes 90% of the parent div height */
-    box-sizing: border-box; /* Includes padding and borders in size calculations */
-}
-
-
 
 
 
@@ -384,26 +368,37 @@ button:active {
 }
 
 
-/* For Stack Top Highlight */
 
-/* For Stack Top Highlight */
-.stack-highlight-flash {
-    animation: flash-stack 3s ease-out;
+
+#row_2_col_2 {
+    height: 400px; /* Example height, adjust as needed */
+    width: 100%; /* Full width of the container */
 }
 
-@keyframes flash-stack {
-    0% {
-        background-color: #ff6347; /* Highlight color: Tomato red */
+#convertControl {
+    display: flex;
+    flex-direction: column; /* Arrange buttons vertically */
+    gap: 10%; /* Add spacing between buttons (10% of parent height) */
+    height: 90%; /* Ensure the parent div's height is fully utilized */
+}
+
+
+
+
+
+
+@keyframes button-flash {
+    0%, 100% {
+        background-color: #007BFF; /* Original button color */
+        color: #FFF; /* Text color */
     }
     50% {
-        background-color: #ff9a85; /* Slightly faded red midway */
-    }
-    100% {
-        background-color: transparent; /* Reset to original state */
+        background-color: #3cff00; /* Flash color */
+        color: #FFF; /* Text color */
     }
 }
 
-/* For User Memory Highlight */
+
 .highlight-flash {
     animation: flash-user 5s ease-out;
 }
@@ -413,15 +408,30 @@ button:active {
         background-color: #ffeb3b; /* Yellow for user memory */
     }
     50% {
-        background-color: #fff59d; /* Slightly faded yellow */
+        background-color: #bfff9d; /* Slightly faded yellow */
     }
     100% {
         background-color: transparent; /* Reset to original state */
     }
 }
 
-/* Prevent propagation to children */
-.stack-highlight-flash *,
+
 .highlight-flash * {
     animation: none !important;
+}
+
+
+@keyframes blink-effect {
+    0%, 100% {
+        background-color: #007BFF; /* Original button color */
+        color: white;
+    }
+    50% {
+        background-color: #FFD700; /* Flashing yellow */
+        color: black;
+    }
+}
+
+.blink {
+    animation: blink-effect 1s linear infinite alternate; /* Blinks continuously */
 }

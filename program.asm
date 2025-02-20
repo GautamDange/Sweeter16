@@ -151,3 +151,91 @@ HLT             ; Halt the program
 
 
 
+; Initialize registers
+LDL R1, #0x05      ; Load 5 into R1
+LDL R2, #0x03      ; Load 3 into R2
+LDL R3, #0x00      ; Load 0 into R3
+LDL R4, #0xFF      ; Load 255 into R4
+; Demonstrating Increment & Decrement
+INR R1             ; Increment R1 → R1 = 6
+DCR R2             ; Decrement R2 → R2 = 2
+; Demonstrating Set & Clear
+SET_ALL                ; Set all registers to 1 (0xFFFF)
+CLEAR_ALL              ; Clear all registers (0x0000)
+; Demonstrating Swap
+LDL R1, #0x12      ; Load 0x12 into R1
+LDL R2, #0x34      ; Load 0x34 into R2
+SWAP R1, R2        ; Swap R1 and R2
+; Demonstrating CLZ & CTZ
+LDL R1, #0x00F0    ; Load 0x00F0 (8 leading zeros, 4 trailing zeros)
+CLZ R2, R1         ; Count leading zeros of R1 → R2 = 8
+CTZ R3, R1         ; Count trailing zeros of R1 → R3 = 4
+; Demonstrating Rotate Left & Right by Register
+LDL R1, #0x1234    ; Load some data into R1
+LDL R2, #0x0004    ; Load shift amount into R2
+ROLN R1, R2        ; Rotate R1 left by 4 bits
+RORN R1, R2        ; Rotate R1 right by 4 bits
+; Demonstrating MAX & MIN
+LDL R1, #0x30      ; Load 0x30 into R1
+LDL R2, #0x50      ; Load 0x50 into R2
+MAX R3, R1, R2     ; R3 = max(R1, R2) → R3 = 0x50
+MIN R4, R1, R2     ; R4 = min(R1, R2) → R4 = 0x30
+; Demonstrating Bit Reversal
+LDL R1, #0x0F0F    ; Load 0x0F0F into R1
+REV R2, R1         ; Reverse bits of R1 → Store in R2
+; Demonstrating CRC Calculation
+LDL R1, #0x1234    ; Load data
+LDL R2, #0x8005    ; Load CRC polynomial
+CRC R3, R1, R2     ; Compute CRC of R1 using polynomial R2, store in R3
+HLT                ; Halt the program
+
+
+
+
+
+
+; Initialize registers with different values
+LDL R1, #0x0A      ; Load 10 into R1
+LDL R2, #0x05      ; Load 5 into R2
+LDL R3, #0xFF      ; Load 255 into R3
+LDL R4, #0x0001    ; Load 1 into R4
+; Demonstrating Increment & Decrement
+INR R1             ; Increment R1 → R1 = 11
+DCR R2             ; Decrement R2 → R2 = 4
+; Demonstrating Set & Clear
+SET_ALL                ; Set all registers to 1 (0xFFFF)
+CLEAR_ALL              ; Clear all registers (0x0000)
+; Demonstrating Swap
+LDL R1, #0x55AA    ; Load 0x55AA into R1
+LDL R2, #0xAA55    ; Load 0xAA55 into R2
+SWAP R1, R2        ; Swap R1 and R2
+; Demonstrating CLZ & CTZ
+LDL R1, #0x00F0    ; Load 0x00F0 (8 leading zeros, 4 trailing zeros)
+CLZ R2, R1         ; Count leading zeros of R1 → Store in R2
+CTZ R3, R1         ; Count trailing zeros of R1 → Store in R3
+; Demonstrating Rotate Left & Right by Register
+LDL R1, #0x1234    ; Load some data into R1
+LDL R2, #0x0003    ; Load shift amount into R2
+ROLN R1, R2        ; Rotate R1 left by 3 bits
+RORN R1, R2        ; Rotate R1 right by 3 bits
+; Demonstrating MAX & MIN
+LDL R1, #0x30      ; Load 0x30 into R1
+LDL R2, #0x50      ; Load 0x50 into R2
+MAX R3, R1, R2     ; R3 = max(R1, R2) → R3 = 0x50
+MIN R4, R1, R2     ; R4 = min(R1, R2) → R4 = 0x30
+; Demonstrating Bit Reversal
+LDL R1, #0x0F0F    ; Load 0x0F0F into R1
+REV R2, R1         ; Reverse bits of R1 → Store in R2
+; Demonstrating CRC Calculation
+LDL R1, #0x1234    ; Load data
+LDL R2, #0x8005    ; Load CRC polynomial
+CRC R3, R1, R2     ; Compute CRC of R1 using polynomial R2, store in R3
+HLT                ; Halt the program
+
+
+
+
+
+
+
+

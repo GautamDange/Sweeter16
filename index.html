@@ -24,13 +24,14 @@
         <textarea id="InputASM"
             placeholder=" Paste your ASM program here (use hexadecimal, e.g., #0x6, #0x5 for constants)... "></textarea>
     </div>
-    <div id="row_2_col_2">
+    <div id="row_2_col_2" style="height: 100%; width: 100%;">
         <div id="convertControl">
-            <button id="Convert" class="primary-btn">Convert</button>
-        </div>
+            <button id="Convert" class="primary-btn" >Convert</button>
 
-    
+            <button id="RESET" class="primary-btn" onclick="location.reload();">RESET (New ASM Program)</button>
+        </div>
     </div>
+    
 
     <div id="row_2_col_3">
         <textarea id="InMemoryProgram" readonly placeholder="Memory-mapped ASM program..."></textarea>
@@ -86,6 +87,9 @@
             <div id="tabButtons">
                 <button id="tabPrograms" class="tab-btn active">Sample Programs</button>
                 <button id="tabInstructions" class="tab-btn">Instruction Set</button>
+                <button id="tabManual" class="tab-btn">User Manual</button>
+
+
             </div>
     
             <!-- Content Display Area -->
@@ -124,6 +128,7 @@
     <script src="script.js"></script>
     <script src="assembler.js"></script>
     <script src="simulator.js"></script>
+    <script src="UserManual.js"></script>
  
     </script>
 </body>

@@ -12,22 +12,9 @@ function flashElement(elementId) {
     }
 }
 
-function flashTopStackElement() {
-    const stackDisplay = document.getElementById('stackDisplay');
-    if (stackDisplay && stackDisplay.lastElementChild) {
-        const topElement = stackDisplay.lastElementChild;
 
-        // Force restart the animation
-        topElement.classList.remove('stack-highlight-flash');
-        void topElement.offsetWidth; // Trigger reflow to restart the animation
-        topElement.classList.add('stack-highlight-flash');
-    }
-}
+//document.getElementById('stackDisplay').innerText = 'Updated stack contents...';
 
-
-
-document.getElementById('stackDisplay').innerText = 'Updated stack contents...';
-flashElement('stackDisplay');
 
 document.getElementById('Convert').addEventListener('click', () => {
     const inputASM = document.getElementById('InputASM').value;
@@ -38,12 +25,23 @@ document.getElementById('Convert').addEventListener('click', () => {
 
     try {
         const assembledProgram = assemble(inputASM); // Convert ASM to JSON
-        // Load the assembled program into the simulator
         loadProgram(assembledProgram);
     } catch (error) {
         alert(`Error during assembly: ${error.message}`);
     }
+
+    disableConvertButton();
+
+    // ✅ SHOW "RUN NEXT" & "RESET" BUTTONS AFTER CONVERT CLICK
+    document.getElementById('RUN_NEXT').style.display = 'inline-block';
+    document.getElementById('RESET').style.display = 'inline-block';
+
+    // ❌ HIDE "CONVERT" BUTTON AFTER CLICK
+    document.getElementById('Convert').style.display = 'none';
 });
+
+
+
 
 
 document.getElementById('RUN_NEXT').addEventListener('click', () => {
@@ -90,4 +88,61 @@ tabInstructions.addEventListener('click', () => {
     loadInstructionSet();
 });
 
+document.getElementById('tabManual').addEventListener('click', () => {
+    document.getElementById('tabManual').classList.add('active');
+    document.getElementById('tabPrograms').classList.remove('active');
+    document.getElementById('tabInstructions').classList.remove('active');
+
+    // Convert Markdown-style text to HTML with headers and line breaks
+    const formattedManual = UserManual
+        .replace(/## (.*?)\n/g, "<h2>$1</h2>\n")  // Convert ## to <h2>
+        .replace(/# (.*?)\n/g, "<h1>$1</h1>\n")   // Convert # to <h1>
+        .replace(/\n/g, "<br>");                  // Convert remaining new lines to <br>
+
+    document.getElementById('tabContent').innerHTML = formattedManual;
+});
+
+
 loadSamplePrograms();
+
+function disableConvertButton() 
+{
+    const button = document.getElementById('Convert');
+    button.disabled = true; // Disable the button
+    button.innerText = " Converted "; // Optionally change the button text
+    flashButton('RUN_NEXT'); // Add flashing animation to RUN_NEXT button
+}
+
+
+function flashButton(buttonId) {
+    const button = document.getElementById(buttonId);
+    if (!button) return; // Exit if the button doesn't exist
+
+    // Add the highlight-flash class to start the animation
+    button.classList.add('highlight-flash');
+
+    // Remove the class after the animation finishes (5 cycles * 1s = 5 seconds)
+    setTimeout(() => {
+        button.classList.remove('highlight-flash');
+    }, 5000); // Adjust the timeout duration to match the animation time
+}
+
+// Call the function to flash the RUN_NEXT button
+flashButton('Convert');
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    const manualButton = document.getElementById("tabManual");
+
+    if (manualButton) {
+        // Add the blinking effect
+        manualButton.classList.add("blink");
+
+        // Stop blinking after 5 seconds
+        setTimeout(() => {
+            manualButton.classList.remove("blink");
+        }, 5000);
+    } else {
+        console.error("tabManual button not found! Check if the ID is correct in index.html.");
+    }
+});

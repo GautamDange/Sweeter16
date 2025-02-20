@@ -32,14 +32,13 @@ const memoryInput = document.getElementById('dynamicMemoryContentsForUser');
 const addMemoryButton = document.getElementById('addMemoryContent');
 
 
-
-
 addMemoryButton.addEventListener('click', () => {
     const inputValue = memoryInput.value.trim();
     if (!inputValue) {
         alert("Please provide a memory address and content.");
         return;
     }
+
     const [address, content] = inputValue.split(':').map(str => str.trim());
     if (!address.match(/^[0-9A-Fa-f]+$/) || !content.match(/^[0-9A-Fa-f]+$/)) {
         alert("Invalid input format. Use hexadecimal (e.g., 0x0000:0xA).");
@@ -57,30 +56,62 @@ addMemoryButton.addEventListener('click', () => {
     UserMemory[memoryAddress] = memoryContent; // Update UserMemory
     updateUserMemoryDisplay(memoryAddress); // Update only this address in the display
 
-    alert(`User Memory at address 0x${memoryAddress.toString(16).toUpperCase()} updated to 0x${memoryContent.toString(16).toUpperCase()} (decimal: ${memoryContent})`);
+    // ✅ Add checkmark emoji to success message
+    alert(`✅ User Memory at address 0x${memoryAddress.toString(16).toUpperCase()} updated to 0x${memoryContent.toString(16).toUpperCase()} (decimal: ${memoryContent})`);
 });
 
 
 function updateUserMemoryDisplay(updatedAddress) {
     const dynamicMemoryDisplay = document.getElementById('dynamicmemorydisplay');
+
     if (!dynamicMemoryDisplay) {
-        console.error("Error: dynamicmemorydisplay element not found!");
+        console.error("❌ Error: dynamicmemorydisplay element not found!");
         return;
     }
 
-    // Fetch the value of the updated address
-    const value = UserMemory[updatedAddress] || 0x0000;
-    const hexAddress = updatedAddress.toString(16).padStart(4, '0').toUpperCase();
+    // Log the incoming `updatedAddress` value
+    console.log("🔍 Debug: updateUserMemoryDisplay called with updatedAddress =", updatedAddress);
+
+    // Check if `updatedAddress` is valid
+    if (typeof updatedAddress === 'undefined' || updatedAddress === null) {
+        console.error("❌ Error: updatedAddress is undefined or null. Function execution stopped.");
+        return;
+    }
+
+    // Ensure `updatedAddress` is a valid number before converting
+    const safeAddress = Number(updatedAddress);
+    if (isNaN(safeAddress) || safeAddress < 0) {
+        console.error("❌ Error: updatedAddress is invalid. Received:", updatedAddress);
+        return;
+    }
+
+    // Now it's safe to convert to hex
+    const hexAddress = safeAddress.toString(16).padStart(4, '0').toUpperCase();
+    console.log("✅ Debug: Converted hexAddress =", hexAddress);
+
+    // Check if `UserMemory` exists and has data at `safeAddress`
+    if (!UserMemory || !(safeAddress in UserMemory) || typeof UserMemory[safeAddress] === 'undefined') {
+        console.error(`❌ Error: UserMemory at address 0x${hexAddress} is undefined.`);
+        return;
+    }
+
+    const value = UserMemory[safeAddress]; // Now safely defined
+    console.log("✅ Debug: UserMemory value at address", hexAddress, "=", value);
+
+    // Ensure value is a valid number before converting
+    if (typeof value !== 'number' || isNaN(value)) {
+        console.error("❌ Error: Value at UserMemory[", safeAddress, "] is not a valid number:", value);
+        return;
+    }
+
     const hexValue = `0x${value.toString(16).toUpperCase()}`;
 
     // Check if the memory entry already exists
     let existingElement = document.getElementById(`userMemory-${hexAddress}`);
 
     if (existingElement) {
-        // If the entry exists, just update the content
         existingElement.innerHTML = `0x${hexAddress}: ${hexValue} (${value})`;
     } else {
-        // If the entry does not exist, append a new one
         const newEntry = document.createElement('div');
         newEntry.id = `userMemory-${hexAddress}`;
         newEntry.className = 'user-memory-item';
@@ -92,44 +123,141 @@ function updateUserMemoryDisplay(updatedAddress) {
     flashElement(`userMemory-${hexAddress}`);
 }
 
-
-function updateUserMemoryDisplayy(updatedAddress) {
-    const dynamicMemoryDisplay = document.getElementById('dynamicmemorydisplay');
-
-    if (!dynamicMemoryDisplay) {
-        console.error("Error: dynamicmemorydisplay element not found!");
-        return;
-    }
-
-    // Check if the updated address is already in the memory map
-    const value = UserMemory[updatedAddress] || 0x0000; // Fetch updated value
-    const hexAddress = updatedAddress.toString(16).padStart(4, '0').toUpperCase();
-    const hexValue = `0x${value.toString(16).toUpperCase()}`;
-    const decimalValue = value;
-
-    // Update the memory map
-    userMemoryMap[updatedAddress] = value;
-
-    // Rebuild the display content with line breaks
-    let updatedContent = '';
-    Object.keys(userMemoryMap)
-        .sort((a, b) => a - b) // Sort addresses in ascending order
-        .forEach(address => {
-            const val = userMemoryMap[address];
-            updatedContent += `0x${parseInt(address).toString(16).padStart(4, '0').toUpperCase()}: 0x${val.toString(16).toUpperCase()} (${val})\n`;
-        });
-
-    // Update the dynamic memory display using innerText to preserve newlines
-    dynamicMemoryDisplay.innerText = updatedContent.trim();
-}
-
-
-
-
-
-
-
 const instructions = {
+
+    "INR": (rd) => {
+        registers[rd] = (registers[rd] + 1) & HEX_MASK;
+        zeroFlag = registers[rd] === 0 ? 1 : 0;
+        updateFlagsDisplay();
+        updateRegisterDisplay();
+    },
+
+    "DCR": (rd) => {
+        registers[rd] = (registers[rd] - 1) & HEX_MASK;
+        zeroFlag = registers[rd] === 0 ? 1 : 0;
+        updateFlagsDisplay();
+        updateRegisterDisplay();
+    },
+    "SET": (rd) => {
+        registers[rd] = 0xFFFF;
+        updateRegisterDisplay();
+    },
+
+    // ✅ CLEAR a specific register to 0x0000
+    "CLEAR": (rd) => {
+        registers[rd] = 0x0000;
+        updateRegisterDisplay();
+    },
+
+    // ✅ ONE: Set a specific register to 0x0001
+    "ONE": (rd) => {
+        registers[rd] = 0x0001;
+        updateRegisterDisplay();
+    },
+
+    // ✅ SET_ALL: Set all registers to 0xFFFF
+    "SET_ALL": () => {
+        for (let i = 0; i < registers.length; i++) {
+            registers[i] = 0xFFFF;
+        }
+        updateRegisterDisplay();
+    },
+
+    // ✅ CLEAR_ALL: Clear all registers to 0x0000
+    "CLEAR_ALL": () => {
+        for (let i = 0; i < registers.length; i++) {
+            registers[i] = 0x0000;
+        }
+        updateRegisterDisplay();
+    },
+
+    // ✅ ONE_ALL: Set all registers to 0x0001
+    "ONE_ALL": () => {
+        for (let i = 0; i < registers.length; i++) {
+            registers[i] = 0x0001;
+        }
+        updateRegisterDisplay();
+    },
+
+    "SWAP": (rd, rs) => {
+        [registers[rd], registers[rs]] = [registers[rs], registers[rd]];
+        updateRegisterDisplay();
+    },
+
+    "CLZ": (rd, rs) => {
+        let value = registers[rs];
+        let count = 0;
+        while ((value & 0x8000) === 0 && count < 16) {
+            value <<= 1;
+            count++;
+        }
+        registers[rd] = count;
+        updateRegisterDisplay();
+    },
+
+    "CTZ": (rd, rs) => {
+        let value = registers[rs];
+        let count = 0;
+        while ((value & 1) === 0 && count < 16) {
+            value >>= 1;
+            count++;
+        }
+        registers[rd] = count;
+        updateRegisterDisplay();
+    },
+
+    "ROLN": (rd, rs) => {
+        let shiftAmount = registers[rs] & 0xF;
+        registers[rd] = ((registers[rd] << shiftAmount) | (registers[rd] >> (16 - shiftAmount))) & HEX_MASK;
+        updateRegisterDisplay();
+    },
+
+    "RORN": (rd, rs) => {
+        let shiftAmount = registers[rs] & 0xF;
+        registers[rd] = ((registers[rd] >> shiftAmount) | (registers[rd] << (16 - shiftAmount))) & HEX_MASK;
+        updateRegisterDisplay();
+    },
+
+    "MAX": (rd, rs, rt) => {
+        registers[rd] = Math.max(registers[rs], registers[rt]);
+        updateRegisterDisplay();
+    },
+
+    "MIN": (rd, rs, rt) => {
+        registers[rd] = Math.min(registers[rs], registers[rt]);
+        updateRegisterDisplay();
+    },
+
+    "REV": (rd, rs) => {
+        let value = registers[rs];
+        let reversed = 0;
+        for (let i = 0; i < 16; i++) {
+            reversed = (reversed << 1) | (value & 1);
+            value >>= 1;
+        }
+        registers[rd] = reversed;
+        updateRegisterDisplay();
+    },
+
+    "CRC": (rd, rs, rt) => {
+        let data = registers[rs];
+        let poly = registers[rt];
+        let crc = data;
+
+        for (let i = 0; i < 16; i++) {
+            if ((crc & 0x8000) !== 0) {
+                crc = (crc << 1) ^ poly;
+            } else {
+                crc <<= 1;
+            }
+            crc &= HEX_MASK;
+        }
+
+        registers[rd] = crc;
+        updateRegisterDisplay();
+    },
+
+
     // 1. Data Movement Instructions
     "LDL": (rd, val) => {
         if (val < 0 || val > 0xFFFF) {
@@ -172,7 +300,6 @@ const instructions = {
         console.log(`STO: Stored value 0x${registers[rs].toString(16).toUpperCase()} from R${rs} into address 0x${address.toString(16).toUpperCase()}`);
         updateUserMemoryDisplay(address); // Highlight updated memory
     },
-
 
     // STR: Store value from a register into the memory address specified by another register
     "STR": (rs, rd) => {
@@ -247,7 +374,6 @@ const instructions = {
         updateRegisterDisplay();
     },
 
-
     "DIV": (rd, rs, rt) => {
         if (registers[rt] === 0) {
             throw new Error("Division by zero error!");
@@ -268,7 +394,6 @@ const instructions = {
     "NOT": (rd, rs) => { registers[rd] = ~registers[rs] & HEX_MASK; },
 
     // 4. Bit Manipulation Instructions
-
     "SHL": (rd) => {
         // Ensure the register value is treated as a hexadecimal number
         const value = parseInt(registers[rd], 16);
@@ -289,7 +414,6 @@ const instructions = {
         updateFlagsDisplay();
         updateRegisterDisplay();
     },
-
 
     "SHLC": (rd, rs) => {
         const shifts = registers[rs] & 0xFFFF; // Extract the number of shifts from the register
@@ -372,8 +496,6 @@ const instructions = {
         updateFlagsDisplay(); // Refresh the flags display
     },
 
-
-
     // 5. Control Flow Instructions
     "CMP": (rs, rt) => {
         const result = registers[rs] - registers[rt];
@@ -422,9 +544,11 @@ const instructions = {
 function updateStackDisplay() {
     const stackDisplay = document.getElementById('stackDisplay');
 
-    // Remove old top flash highlight
-    const oldTopElement = stackDisplay.querySelector('.stack-highlight-flash');
-    if (oldTopElement) oldTopElement.classList.remove('stack-highlight-flash');
+    // If the stack is empty, exit without flashing or updating
+    if (stack.length === 0) {
+        stackDisplay.innerHTML = ''; // Clear the stack display
+        return; // Stop further processing
+    }
 
     // Clear stack display and update only visible content
     stackDisplay.innerHTML = ''; // Reset
@@ -438,14 +562,12 @@ function updateStackDisplay() {
         newStackElement.id = `stack-item-${i}`;
         newStackElement.textContent = `0x${address.toString(16).toUpperCase()}: 0x${contents.toString(16).toUpperCase()} (${decimalValue})`;
 
-        // Add flash highlight ONLY to the topmost element
-        if (i === stack.length - 1) {
-            newStackElement.classList.add('stack-highlight-flash');
-        }
-
         stackDisplay.appendChild(newStackElement);
     }
 }
+
+
+
 
 function flashTopStackElement() {
     const stackDisplay = document.getElementById('stackDisplay');
@@ -662,9 +784,9 @@ function initialize() {
         { op: "ADD", args: [2, 0, 1] } // Add R0 and R1, store the result in R2
     ];
     const asmText = `
-LDL R0, #0x5
-LDL R1, #0xA
-ADD R2, R0, R1`.trim();
+    LDL R0, #0x5
+    LDL R1, #0xA
+    ADD R2, R0, R1`.trim();
 
     const inputAsmTextarea = document.getElementById('InputASM');
     inputAsmTextarea.value = asmText;
@@ -674,8 +796,12 @@ ADD R2, R0, R1`.trim();
     updateMemoryDisplay();
     updateControlPanel();
     updateStackDisplay();
-    updateUserMemoryDisplay();
+
+    // 🔴 HIDE "RUN NEXT" & "RESET" BUTTONS ON PAGE LOAD
+    document.getElementById('RUN_NEXT').style.display = 'none';
+    document.getElementById('RESET').style.display = 'none';
 }
+
 
 
 // Start the simulation

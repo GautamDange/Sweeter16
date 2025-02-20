@@ -1,0 +1,62 @@
+/* General Page Styling */
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px auto;
+    max-width: 800px;
+    line-height: 1.6;
+    background-color: #ffffff;
+    color: #333;
+}
+
+/* Headings Styling */
+h1, h2 {
+    color: #007BFF;
+    margin-bottom: 10px;
+}
+
+h1 {
+    border-bottom: 3px solid #007BFF;
+    padding-bottom: 8px;
+    margin-bottom: 20px;
+    font-size: 2rem;
+}
+
+h2 {
+    margin-top: 25px;
+    font-size: 1.5rem;
+}
+
+/* List Styling */
+ul, ol {
+    padding-left: 25px;
+    margin-bottom: 15px;
+}
+
+ul li, ol li {
+    margin-bottom: 10px;
+    font-size: 1rem;
+}
+
+/* Inline Styling */
+strong {
+    color: #007BFF;
+    font-weight: bold;
+}
+
+/* Code/Preformatted Block */
+pre {
+    background-color: #f9f9f9;
+    border-left: 4px solid #007BFF;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.95rem;
+    margin: 15px 0;
+    color: #333;
+}
+
+/* Paragraph Styling */
+p {
+    margin-bottom: 15px;
+    font-size: 1rem;
+}

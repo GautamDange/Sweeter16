@@ -1,6 +1,27 @@
 // Define the instruction set with updated operand rules
 
 const instructionSet = {
+
+    // New Instructions
+    "INR": { params: 1, types: ["R"] }, // Increment R1
+    "DCR": { params: 1, types: ["R"] }, // Decrement R2
+    "SET": { params: 1, types: ["R"] },   // SET R1 → Only sets R1
+    "CLEAR": { params: 1, types: ["R"] }, // CLEAR R2 → Only clears R2
+    "ONE": { params: 1, types: ["R"] },   // ONE R3 → Only sets R3 to 1
+    "SET_ALL": { params: 0, types: [] },   // SET_ALL → Sets all registers to 0xFFFF
+    "CLEAR_ALL": { params: 0, types: [] }, // CLEAR_ALL → Clears all registers
+    "ONE_ALL": { params: 0, types: [] },   // ONE_ALL → Sets all registers to 0x0001
+    "SWAP": { params: 2, types: ["R", "R"] }, // Swap two registers
+    "CLZ": { params: 2, types: ["R", "R"] }, // Count leading zeros
+    "CTZ": { params: 2, types: ["R", "R"] }, // Count trailing zeros
+    "ROLN": { params: 2, types: ["R", "R"] }, // Rotate left by R2 bits
+    "RORN": { params: 2, types: ["R", "R"] }, // Rotate right by R2 bits
+    "MAX": { params: 3, types: ["R", "R", "R"] }, // Max(R1, R2)
+    "MIN": { params: 3, types: ["R", "R", "R"] }, // Min(R1, R2)
+    "REV": { params: 2, types: ["R", "R"] }, // Reverse bits of R1 into R2
+    "CRC": { params: 3, types: ["R", "R", "R"] }, // CRC of R1 using R2, store in R3
+
+
     "ADD": { params: 3, types: ["R", "R", "R"] },   // Add two registers into a destination register
     "SUB": { params: 3, types: ["R", "R", "R"] },   // Subtract two registers into a destination register
     "DIV": { params: 3, types: ["R", "R", "R"] },//  Division
@@ -92,36 +113,35 @@ const parseLine = (line, lineNumber, labels) => {
     const op = parts[0].toUpperCase();
 
     let instruction = instructionSet[op];
-    
-    // Check if instructionSet[op] is an array
-    if (Array.isArray(instruction)) {
-        // Find the matching instruction from the array
-        instruction = instruction.find(instr => {
-            // Define your matching criteria. For example:
-            return instr.params === parts.length - 1;
-        });
 
+    // 🛠 Check if instructionSet[op] is an array (for overloaded instructions)
+    if (Array.isArray(instruction)) {
+        instruction = instruction.find(instr => instr.params === parts.length - 1);
         if (!instruction) {
             throw new Error(`No matching instruction for "${op}" on line ${lineNumber}.`);
         }
     }
 
-    // If instruction is still undefined, it means it's not in the instruction set
+    // 🛠 If instruction is still undefined, it means it's not in the instruction set
     if (!instruction) {
         throw new Error(`Unknown instruction "${op}" on line ${lineNumber}.`);
     }
 
     const { params, types } = instruction;
+
+    // 🛠 Ensure correct number of operands
     if (parts.length - 1 !== params) {
-        throw new Error(`"${op}" expects ${params} operands but got ${parts.length - 1}.`);
+        throw new Error(`"${op}" expects ${params} operands but got ${parts.length - 1} on line ${lineNumber}.`);
     }
 
+    // 🛠 Process each operand
     const operands = parts.slice(1).map((operand, index) => {
         return parseOperand(operand, types[index], labels);
     });
 
     return { op, args: operands };
 };
+
 
 
 // Main function to assemble the program
