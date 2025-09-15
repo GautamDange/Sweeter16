@@ -41,3 +41,4 @@ The SWEETER16 Processor Simulator is a tool designed to help users understand an
    - Click on the "User Manual" tab to view this guide.`
 
 
+window.UserManual = UserManual;
