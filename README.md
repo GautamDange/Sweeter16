@@ -1,4 +1,4 @@
-# ASM Tool (Web)
+# Sweeter 16 : An ASM Tool (Web based - no installation required)
 
 This repository contains the source code for my browser-based ASM tool that I use on my website.
 
@@ -36,5 +36,5 @@ If you find a bug or have an idea that would make the tool better, feel free to 
 - If a `LICENSE` file exists in this repository, it defines the licensing terms for this code.
 
 
-Author : Dr. Gautam Dange 
+Author : Dr. Gautam Dange || 
 Email : dange@fias.uni-frankfurt.de
