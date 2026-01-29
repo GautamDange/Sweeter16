@@ -38,7 +38,8 @@ The SWEETER16 Processor Simulator is a tool designed to help users understand an
    - Click on the "Instruction Set" tab to view supported instructions, their syntax, and examples.
 
 3. User Manual:
-   - Click on the "User Manual" tab to view this guide.`
+   - Click on the "User Manual" tab to view this guide.
+`;
 
-
+// Expose to the UI code (script.js reads window.UserManual)
 window.UserManual = UserManual;

@@ -3,14 +3,14 @@
 const instructionSet = {
 
     // New Instructions
-    "INR": { params: 1, types: ["R"] }, // Increment R1
-    "DCR": { params: 1, types: ["R"] }, // Decrement R2
-    "SET": { params: 1, types: ["R"] },   // SET R1 → Only sets R1
-    "CLEAR": { params: 1, types: ["R"] }, // CLEAR R2 → Only clears R2
-    "ONE": { params: 1, types: ["R"] },   // ONE R3 → Only sets R3 to 1
-    "SET_ALL": { params: 0, types: [] },   // SET_ALL → Sets all registers to 0xFFFF
-    "CLEAR_ALL": { params: 0, types: [] }, // CLEAR_ALL → Clears all registers
-    "ONE_ALL": { params: 0, types: [] },   // ONE_ALL → Sets all registers to 0x0001
+    "INR": { params: 1, types: ["R"] }, // Increment a register
+    "DCR": { params: 1, types: ["R"] }, // Decrement a register
+    "SET": { params: 1, types: ["R"] },   // SET Rn → sets Rn to 0xFFFF
+    "CLEAR": { params: 1, types: ["R"] }, // CLEAR Rn → sets Rn to 0x0000
+    "ONE": { params: 1, types: ["R"] },   // ONE Rn → sets Rn to 0x0001
+    "SET_ALL": { params: 0, types: [] },   // SET_ALL → Sets all writable registers
+    "CLEAR_ALL": { params: 0, types: [] }, // CLEAR_ALL → Clears all writable registers
+    "ONE_ALL": { params: 0, types: [] },   // ONE_ALL → Sets all writable registers to 0x0001
     "SWAP": { params: 2, types: ["R", "R"] }, // Swap two registers
     "CLZ": { params: 2, types: ["R", "R"] }, // Count leading zeros
     "CTZ": { params: 2, types: ["R", "R"] }, // Count trailing zeros
