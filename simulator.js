@@ -27,6 +27,12 @@ let zeroFlag = 0;  // Zero flag (0: no zero result, 1: zero result)
 let halted = false; // Add a global variable to track program state
 const HEX_MASK = 0xFFFF; // Mask to ensure 16-bit values
 
+// R0/R1 are fixed registers (hardcoded semantics)
+function enforceFixedRegisters() {
+    registers[0] = 0x0000;
+    registers[1] = 0x0001;
+}
+
 //UI
 const memoryInput = document.getElementById('dynamicMemoryContentsForUser');
 const addMemoryButton = document.getElementById('addMemoryContent');
@@ -157,7 +163,7 @@ const instructions = {
 
     // ✅ SET_ALL: Set all registers to 0xFFFF
     "SET_ALL": () => {
-        for (let i = 0; i < registers.length; i++) {
+        for (let i = 2; i < registers.length; i++) {
             registers[i] = 0xFFFF;
         }
         updateRegisterDisplay();
@@ -165,7 +171,7 @@ const instructions = {
 
     // ✅ CLEAR_ALL: Clear all registers to 0x0000
     "CLEAR_ALL": () => {
-        for (let i = 0; i < registers.length; i++) {
+        for (let i = 2; i < registers.length; i++) {
             registers[i] = 0x0000;
         }
         updateRegisterDisplay();
@@ -173,7 +179,7 @@ const instructions = {
 
     // ✅ ONE_ALL: Set all registers to 0x0001
     "ONE_ALL": () => {
-        for (let i = 0; i < registers.length; i++) {
+        for (let i = 2; i < registers.length; i++) {
             registers[i] = 0x0001;
         }
         updateRegisterDisplay();
@@ -504,6 +510,22 @@ const instructions = {
         updateFlagsDisplay();
         console.log(`CMP: 0x${registers[rs].toString(16).toUpperCase()} - 0x${registers[rt].toString(16).toUpperCase()} = 0x${result.toString(16).toUpperCase()}`);
     },
+    "JC": (address) => {
+        if (carryFlag === 1) {
+            instructionPointer = address;
+            console.log(`JC: Jumped to address 0x${address.toString(16).toUpperCase()} because carryFlag is 1.`);
+        } else {
+            console.log(`JC: No jump, carryFlag is 0.`);
+        }
+    },
+    "JNC": (address) => {
+        if (carryFlag === 0) {
+            instructionPointer = address;
+            console.log(`JNC: Jumped to address 0x${address.toString(16).toUpperCase()} because carryFlag is 0.`);
+        } else {
+            console.log(`JNC: No jump, carryFlag is 1.`);
+        }
+    },
     "JNZ": (address) => {
         if (zeroFlag === 0) {
             instructionPointer = address;
@@ -520,15 +542,43 @@ const instructions = {
             console.log(`JZ: No jump, zeroFlag is 0.`);
         }
     },
-    "JS": (address) => { memory[--stackPointer] = instructionPointer & HEX_MASK; instructionPointer = address; },
+    "JMP": (address) => {
+        instructionPointer = address;
+        console.log(`JMP: Jumped to address 0x${address.toString(16).toUpperCase()}.`);
+    },
+    "JS": (address) => {
+        if (stackPointer <= REAR) {
+            alert("Stack Overflow!");
+            return;
+        }
+        stack.push({
+            address: stackPointer,
+            contents: instructionPointer & HEX_MASK
+        });
+        stackPointer--;
+        instructionPointer = address;
+        updateStackDisplay();
+    },
     "RTS": () => {
-        if (stackPointer >= STACK_END) {
+        if (stackPointer >= FRONT) {
             alert("Stack Underflow!");
             return;
         }
-        instructionPointer = memory[++stackPointer] & HEX_MASK;
+        stackPointer++;
+        const poppedItem = stack.pop();
+        instructionPointer = (poppedItem?.contents ?? 0) & HEX_MASK;
+        updateStackDisplay();
     },
-    "RTI": () => { instructionPointer = memory[++stackPointer] & HEX_MASK; },
+    "RTI": () => {
+        if (stackPointer >= FRONT) {
+            alert("Stack Underflow!");
+            return;
+        }
+        stackPointer++;
+        const poppedItem = stack.pop();
+        instructionPointer = (poppedItem?.contents ?? 0) & HEX_MASK;
+        updateStackDisplay();
+    },
     "BRA": (cond, offset) => { if (evaluateCondition(cond)) instructionPointer = (instructionPointer + offset) & HEX_MASK; },
     "HLT": () => {
         console.log("Halting the program");
@@ -599,6 +649,7 @@ function loadProgram(assembledProgram) {
         return;
     }
 
+    enforceFixedRegisters();
     program = assembledProgram; // Use the dynamically assembled program
 
     // Load instructions into memory starting from 0x0000
@@ -628,8 +679,19 @@ function loadProgram(assembledProgram) {
 function updateRegisterDisplay() {
     const registerDisplay = document.querySelector('.register-display');
 
+    enforceFixedRegisters();
+
     registers.forEach((value, index) => {
         const registerElement = document.getElementById(`register-R${index}`);
+        if (!registerElement) return;
+
+        // Mark fixed registers (R0 and R1) in the UI
+        if (index === 0 || index === 1) {
+            registerElement.classList.add("fixed-register");
+        } else {
+            registerElement.classList.remove("fixed-register");
+        }
+
         const previousValue = registerElement.dataset.value || "0"; // Track previous value using data attribute
 
         // Update register display content
@@ -749,6 +811,8 @@ function executeNext() {
         return; // Prevent further execution
     }
 
+    enforceFixedRegisters();
+
     if (instructionPointer >= program.length) {
         alert("End of Program");
         return;
@@ -758,6 +822,8 @@ function executeNext() {
     if (instructions[op]) {
         instructions[op](...args);
     }
+
+    enforceFixedRegisters();
 
     const memoryTextarea = document.getElementById('InMemoryProgram');
     const memoryLines = memoryTextarea.value.split('\n');
@@ -779,17 +845,50 @@ function executeNext() {
 
 function initialize() {
     const defaultProgram = [
-        { op: "LDL", args: [0, 5] }, // Load the value 5 into register R0
-        { op: "LDL", args: [1, 10] }, // Load the value 10 into register R1
-        { op: "ADD", args: [2, 0, 1] } // Add R0 and R1, store the result in R2
+        { op: "LDL", args: [2, 5] },  // Load the value 5 into register R2
+        { op: "LDL", args: [3, 10] }, // Load the value 10 into register R3
+        { op: "ADD", args: [4, 2, 3] } // Add R2 and R3, store the result in R4
     ];
     const asmText = `
-    LDL R0, #0x5
-    LDL R1, #0xA
-    ADD R2, R0, R1`.trim();
+    LDL R2, #0x5
+    LDL R3, #0xA
+    ADD R4, R2, R3`.trim();
 
     const inputAsmTextarea = document.getElementById('InputASM');
+    const cleared = sessionStorage.getItem("s16-asm-cleared") === "1";
+    if (cleared) {
+        sessionStorage.removeItem("s16-asm-cleared");
+        inputAsmTextarea.value = "";
+        program = [];
+        const programDisplay = document.getElementById('InMemoryProgram');
+        if (programDisplay) programDisplay.value = "";
+        instructionPointer = 0x0000;
+        stack = [];
+        stackPointer = FRONT;
+        carryFlag = 0;
+        zeroFlag = 0;
+        halted = false;
+        enforceFixedRegisters();
+        updateRegisterDisplay();
+        updateMemoryDisplay();
+        updateControlPanel();
+        updateStackDisplay();
+
+        // Ensure Convert is visible on reset-clear
+        const convertBtn = document.getElementById('Convert');
+        if (convertBtn) {
+            convertBtn.style.display = "inline-block";
+            convertBtn.disabled = false;
+            convertBtn.innerText = "Convert";
+        }
+        document.getElementById('RUN_NEXT').style.display = 'none';
+        document.getElementById('RESET').style.display = 'none';
+        return;
+    }
+
     inputAsmTextarea.value = asmText;
+
+    enforceFixedRegisters();
 
     loadProgram(defaultProgram);
     updateRegisterDisplay();

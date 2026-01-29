@@ -202,12 +202,24 @@ button:active {
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
+/* Fixed registers (R0/R1) */
+.register-item.fixed-register {
+    /* More visible "locked" styling */
+    background: linear-gradient(90deg, #b197fc 0 6px, #ede9fe 6px);
+    border-color: #845ef7;
+}
+
 /* Hover Effect */
 .register-item:hover {
     transform: translateY(-3px); /* Slight lift */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* More prominent shadow */
     background-color: #e9f5ff; /* Light blue background */
     color: #007BFF; /* Blue text on hover */
+}
+
+.register-item.fixed-register:hover {
+    background: linear-gradient(90deg, #b197fc 0 6px, #ede9fe 6px); /* keep fixed tint on hover */
+    color: inherit;
 }
 
 
